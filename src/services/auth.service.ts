@@ -1,6 +1,14 @@
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { UserRoleType, Profile } from '../types';
 
+const getAppOrigin = () => {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return 'http://localhost:5173';
+};
+
 const requireAuthConfiguration = () => {
   if (!isSupabaseConfigured) {
     throw new Error(
@@ -22,6 +30,7 @@ export const authService = {
       email: data.email,
       password: data.password,
       options: {
+        emailRedirectTo: `${getAppOrigin()}/login?confirmed=1`,
         data: {
           username: data.username,
           display_name: data.displayName,
@@ -32,6 +41,16 @@ export const authService = {
 
     if (error) throw error;
     return authData;
+  },
+
+  async confirmEmail(tokenHash: string, type: 'email' | 'signup') {
+    requireAuthConfiguration();
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type,
+    });
+    if (error) throw error;
+    return { data };
   },
 
   async login(email: string, password: string) {
@@ -52,7 +71,7 @@ export const authService = {
   async requestPasswordReset(email: string) {
     requireAuthConfiguration();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${getAppOrigin()}/reset-password`,
     });
     if (error) throw error;
   },

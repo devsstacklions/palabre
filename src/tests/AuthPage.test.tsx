@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   logout: vi.fn(),
   register: vi.fn(),
   requestPasswordReset: vi.fn(),
+  confirmEmail: vi.fn(),
 }));
 
 vi.mock('../contexts/AuthContext', () => ({
@@ -21,6 +22,7 @@ vi.mock('../contexts/AuthContext', () => ({
 vi.mock('../services/auth.service', () => ({
   authService: {
     requestPasswordReset: mocks.requestPasswordReset,
+    confirmEmail: mocks.confirmEmail,
   },
 }));
 
@@ -45,6 +47,7 @@ describe('AuthPage connection choices', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.logout.mockResolvedValue(undefined);
+    mocks.confirmEmail.mockResolvedValue({ data: { session: null } });
   });
 
   it('affiche les espaces utilisateur et admin, et sélectionne le mode admin via le lien', () => {
@@ -92,5 +95,34 @@ describe('AuthPage connection choices', () => {
 
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('/admin'));
     expect(mocks.logout).not.toHaveBeenCalled();
+  });
+
+  it('affiche ou masque le mot de passe sur l’écran de connexion', () => {
+    renderAuthPage('/login');
+    const password = screen.getByPlaceholderText('••••••••');
+
+    expect(password).toHaveAttribute('type', 'password');
+    fireEvent.click(screen.getByRole('button', { name: 'Afficher le mot de passe' }));
+    expect(password).toHaveAttribute('type', 'text');
+    fireEvent.click(screen.getByRole('button', { name: 'Masquer le mot de passe' }));
+    expect(password).toHaveAttribute('type', 'password');
+  });
+
+  it('vérifie un lien de confirmation avec token hash', async () => {
+    renderAuthPage('/login?token_hash=valid-token&type=signup');
+
+    await waitFor(() => expect(mocks.confirmEmail).toHaveBeenCalledWith('valid-token', 'signup'));
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Votre adresse e-mail est confirmée.'
+    );
+  });
+
+  it('signale un lien de confirmation expiré', async () => {
+    mocks.confirmEmail.mockRejectedValue(new Error('Token has expired or is invalid'));
+    renderAuthPage('/login?token_hash=expired-token&type=email');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Le lien de confirmation est invalide ou a expiré.'
+    );
   });
 });

@@ -79,43 +79,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let mounted = true;
+    let loadVersion = 0;
 
-    async function initAuth() {
+    const initializeSession = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
-        if (mounted) {
-          setSession(data.session);
-          setUser(data.session?.user ?? null);
-          if (data.session?.user) {
-            await fetchUserData(data.session.user);
-          }
-        }
-      } catch (err) {
-        console.warn('Initialisation session auth:', err);
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
-    }
+        const { data, error } = await supabase.auth.getSession();
+        if (!mounted) return;
 
-    initAuth();
+        if (error) {
+          throw error;
+        }
+
+        const currentUser = data.session?.user ?? null;
+        setSession(data.session ?? null);
+        setUser(currentUser);
+
+        if (!currentUser) {
+          setProfile(null);
+          setRole('user');
+          setIsLoading(false);
+          return;
+        }
+
+        const currentVersion = ++loadVersion;
+        setIsLoading(true);
+        window.setTimeout(() => {
+          if (!mounted || currentVersion !== loadVersion) return;
+          void fetchUserData(currentUser)
+            .catch((err) => {
+              console.warn('Chargement du profil après initialisation de session:', err);
+            })
+            .finally(() => {
+              if (mounted && currentVersion === loadVersion) setIsLoading(false);
+            });
+        }, 0);
+      } catch (err) {
+        console.warn('Erreur lors de la récupération de la session initiale:', err);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setRole('user');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void initializeSession();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!mounted) return;
+      const currentVersion = ++loadVersion;
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      if (newSession?.user) {
-        await fetchUserData(newSession.user);
-      } else {
+      if (!newSession?.user) {
         setProfile(null);
         setRole('user');
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+
+      setIsLoading(true);
+      window.setTimeout(() => {
+        if (!mounted || currentVersion !== loadVersion) return;
+        void fetchUserData(newSession.user)
+          .catch((err) => {
+            console.warn('Chargement du profil après changement de session:', err);
+          })
+          .finally(() => {
+            if (mounted && currentVersion === loadVersion) setIsLoading(false);
+          });
+      }, 0);
     });
 
     return () => {
       mounted = false;
+      loadVersion += 1;
       subscription.unsubscribe();
     };
   }, []);

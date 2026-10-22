@@ -2,11 +2,16 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const hasPlaceholder = (value: string | undefined) =>
+  !value ||
+  /votre-projet|votre_cle|project-ref|publishable-ou-anon|<[^>]+>|clé-publique-réelle/i.test(value);
+
 export const isSupabaseConfigured = Boolean(
   supabaseUrl?.trim() &&
     supabaseAnonKey?.trim() &&
-    !supabaseUrl.includes('votre-projet') &&
-    !supabaseAnonKey.includes('votre_cle')
+    !hasPlaceholder(supabaseUrl) &&
+    !hasPlaceholder(supabaseAnonKey) &&
+    supabaseAnonKey.trim().length >= 20
 );
 
 if (!isSupabaseConfigured) {

@@ -1,5 +1,8 @@
 # Création du premier administrateur
 
+Avant cette étape, créez/configurez Supabase et exécutez les migrations comme
+indiqué dans [SETUP.md](./SETUP.md).
+
 La création d'un administrateur se fait par le propriétaire du projet dans le
 tableau de bord Supabase, jamais depuis une route publique ou le navigateur de
 l'application.

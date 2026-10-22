@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
@@ -24,23 +24,29 @@ import {
   ShieldCheck,
   UserRound,
   LockKeyhole,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
   const [tab, setTab] = useState<'login' | 'register' | 'forgot'>('login');
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [audience, setAudience] = useState<'user' | 'admin'>(
     searchParams.get('mode') === 'admin' ? 'admin' : 'user'
   );
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const processedConfirmationToken = useRef<string | null>(null);
   const { login, register: authRegister, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const requestedMode = searchParams.get('mode');
     setAudience(requestedMode === 'admin' ? 'admin' : 'user');
     if (requestedMode === 'admin') {
@@ -50,7 +56,47 @@ export const AuthPage: React.FC = () => {
     } else if (requestedMode === 'user') {
       setTab('login');
     }
+    if (searchParams.get('confirmed') === '1') {
+      setAuthSuccess('Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter.');
+    }
   }, [searchParams]);
+
+  useEffect(() => {
+    const confirmationError = searchParams.get('error') || searchParams.get('error_description');
+    if (confirmationError) {
+      setAuthError('Le lien de confirmation est invalide ou a expiré. Demandez un nouvel e-mail de confirmation.');
+      setAuthSuccess('');
+      return;
+    }
+
+    const tokenHash = searchParams.get('token_hash');
+    if (tokenHash) {
+      if (processedConfirmationToken.current === tokenHash) return;
+      processedConfirmationToken.current = tokenHash;
+
+      const type = searchParams.get('type');
+      if (type !== 'email' && type !== 'signup') {
+        setAuthError('Le lien de confirmation est invalide. Demandez un nouvel e-mail de confirmation.');
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      void authService.confirmEmail(tokenHash, type)
+        .then(({ data }) => {
+          if (data.session) {
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+          setAuthSuccess('Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter.');
+          navigate('/login?confirmed=1', { replace: true });
+        })
+        .catch((error: unknown) => {
+          setAuthError(getAuthErrorMessage(error, 'register'));
+          setAuthSuccess('');
+          navigate('/login', { replace: true });
+        });
+    }
+  }, [navigate, searchParams]);
 
   // Formulaire Connexion
   const loginForm = useForm<LoginFormData>({
@@ -312,14 +358,25 @@ export const AuthPage: React.FC = () => {
                   Mot de passe oublié ?
                 </button>
               </div>
-              <input
-                type="password"
-                placeholder="••••••••"
-                {...loginForm.register('password')}
-                className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
-                  loginForm.formState.errors.password ? 'border-red-500' : 'border-palabre-border'
-                }`}
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  {...loginForm.register('password')}
+                  className={`w-full px-3 py-2 pr-11 bg-palabre-bg border rounded-btn text-sm ${
+                    loginForm.formState.errors.password ? 'border-red-500' : 'border-palabre-border'
+                  }`}
+                />
+                <button
+                  type="button"
+                  aria-label={showLoginPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  aria-pressed={showLoginPassword}
+                  onClick={() => setShowLoginPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-palabre-muted hover:text-palabre-text"
+                >
+                  {showLoginPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
               {loginForm.formState.errors.password && (
                 <p className="text-xs text-red-500 mt-1">
                   {loginForm.formState.errors.password.message}
@@ -346,7 +403,7 @@ export const AuthPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="Awa Ndiaye"
+                placeholder="Mouhamed Tine"
                 {...registerForm.register('displayName')}
                 className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
                   registerForm.formState.errors.displayName ? 'border-red-500' : 'border-palabre-border'
@@ -365,7 +422,7 @@ export const AuthPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="awa_dev"
+                placeholder="tine_dev"
                 {...registerForm.register('username')}
                 className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
                   registerForm.formState.errors.username ? 'border-red-500' : 'border-palabre-border'
@@ -384,7 +441,7 @@ export const AuthPage: React.FC = () => {
               </label>
               <input
                 type="email"
-                placeholder="awa@exemple.com"
+                placeholder="tine@exemple.com"
                 {...registerForm.register('email')}
                 className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
                   registerForm.formState.errors.email ? 'border-red-500' : 'border-palabre-border'
@@ -419,14 +476,25 @@ export const AuthPage: React.FC = () => {
                 <label className="block text-xs font-semibold text-palabre-text mb-1">
                   Mot de passe *
                 </label>
-                <input
-                  type="password"
-                  placeholder="8 caractères min."
-                  {...registerForm.register('password')}
-                  className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
-                    registerForm.formState.errors.password ? 'border-red-500' : 'border-palabre-border'
-                  }`}
-                />
+                <div className="relative">
+                  <input
+                    type={showRegisterPassword ? 'text' : 'password'}
+                    placeholder="8 caractères min."
+                    {...registerForm.register('password')}
+                    className={`w-full px-3 py-2 pr-11 bg-palabre-bg border rounded-btn text-sm ${
+                      registerForm.formState.errors.password ? 'border-red-500' : 'border-palabre-border'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    aria-label={showRegisterPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                    aria-pressed={showRegisterPassword}
+                    onClick={() => setShowRegisterPassword((visible) => !visible)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-palabre-muted hover:text-palabre-text"
+                  >
+                    {showRegisterPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
                 {registerForm.formState.errors.password && (
                   <p className="text-xs text-red-500 mt-1">
                     {registerForm.formState.errors.password.message}
@@ -438,14 +506,25 @@ export const AuthPage: React.FC = () => {
                 <label className="block text-xs font-semibold text-palabre-text mb-1">
                   Confirmation *
                 </label>
-                <input
-                  type="password"
-                  placeholder="Répétez"
-                  {...registerForm.register('confirmPassword')}
-                  className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
-                    registerForm.formState.errors.confirmPassword ? 'border-red-500' : 'border-palabre-border'
-                  }`}
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Répétez"
+                    {...registerForm.register('confirmPassword')}
+                    className={`w-full px-3 py-2 pr-11 bg-palabre-bg border rounded-btn text-sm ${
+                      registerForm.formState.errors.confirmPassword ? 'border-red-500' : 'border-palabre-border'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    aria-label={showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                    aria-pressed={showConfirmPassword}
+                    onClick={() => setShowConfirmPassword((visible) => !visible)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-palabre-muted hover:text-palabre-text"
+                  >
+                    {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
                 {registerForm.formState.errors.confirmPassword && (
                   <p className="text-xs text-red-500 mt-1">
                     {registerForm.formState.errors.confirmPassword.message}
