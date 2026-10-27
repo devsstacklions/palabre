@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { notificationService } from '../../services/notification.service';
-import { Menu, X, Bell, ShieldCheck, UserRound, UserPlus } from 'lucide-react';
+import { Menu, X, Bell, UserRound, UserPlus, ShieldCheck } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const { user, profile, isAdmin, isModerator, logout } = useAuth();
+  const { user, profile, isModerator, isAdmin, logout } = useAuth();
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -76,9 +76,6 @@ export const Header: React.FC = () => {
 
           {user && (
             <>
-              <NavLink to="/dashboard" className={navLinkClass}>
-                Tableau de bord
-              </NavLink>
               <NavLink to="/notifications" className={navLinkClass}>
                 <span className="flex items-center gap-1.5">
                   <Bell size={15} />
@@ -100,23 +97,14 @@ export const Header: React.FC = () => {
             Aide
           </NavLink>
 
-          {isAdmin && (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-                  isActive
-                    ? 'bg-amber-100 text-amber-900'
-                    : 'text-amber-800 hover:bg-amber-50'
-                }`
-              }
-            >
-              Administration
-            </NavLink>
-          )}
-          {isModerator && !isAdmin && (
+          {isModerator && (
             <NavLink to="/moderation" className={navLinkClass}>
               Modération
+            </NavLink>
+          )}
+                  {isAdmin && (
+            <NavLink to="/admin" className={navLinkClass}>
+              <span className="flex items-center gap-1.5"><ShieldCheck size={15} /> Console admin</span>
             </NavLink>
           )}
         </nav>
@@ -153,13 +141,6 @@ export const Header: React.FC = () => {
               >
                 <UserRound size={16} aria-hidden="true" />
                 Connexion utilisateur
-              </Link>
-              <Link
-                to="/login?mode=admin"
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-palabre-primary px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-palabre-primaryHover"
-              >
-                <ShieldCheck size={16} aria-hidden="true" />
-                Espace admin
               </Link>
               <Link
                 to="/login?mode=user&tab=register"
@@ -212,13 +193,6 @@ export const Header: React.FC = () => {
           {user && (
             <>
               <NavLink
-                to="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm font-medium text-palabre-text hover:bg-palabre-bg"
-              >
-                Tableau de bord
-              </NavLink>
-              <NavLink
                 to="/notifications"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-palabre-text hover:bg-palabre-bg"
@@ -248,16 +222,7 @@ export const Header: React.FC = () => {
             Aide & Directives
           </NavLink>
 
-          {isAdmin && (
-            <NavLink
-              to="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-sm font-semibold text-amber-800 bg-amber-50"
-            >
-              Administration
-            </NavLink>
-          )}
-          {isModerator && !isAdmin && (
+          {isModerator && (
             <NavLink
               to="/moderation"
               onClick={() => setMobileMenuOpen(false)}
@@ -267,6 +232,13 @@ export const Header: React.FC = () => {
             </NavLink>
           )}
 
+          {isAdmin && (
+            <NavLink
+              to="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white"
+            >Console admin</NavLink>
+          )}
           <div className="pt-3 border-t border-palabre-border">
             {user ? (
               <button
@@ -280,7 +252,7 @@ export const Header: React.FC = () => {
                 Déconnexion
               </button>
             ) : (
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Link
                   to="/login?mode=user"
                   onClick={() => setMobileMenuOpen(false)}
@@ -288,14 +260,6 @@ export const Header: React.FC = () => {
                 >
                   <UserRound size={16} aria-hidden="true" />
                   Connexion utilisateur
-                </Link>
-                <Link
-                  to="/login?mode=admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-palabre-primary px-3 py-2 text-sm font-semibold text-white hover:bg-palabre-primaryHover"
-                >
-                  <ShieldCheck size={16} aria-hidden="true" />
-                  Espace admin
                 </Link>
                 <Link
                   to="/login?mode=user&tab=register"

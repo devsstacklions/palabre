@@ -38,3 +38,13 @@ l'application.
 La migration `20261020000000_admin_access_controls.sql` doit être appliquée
 avant d'utiliser le tableau de bord : elle autorise les comptes ADMIN à lire
 tous les profils tout en retirant l'accès API à la colonne d'adresse e-mail.
+
+Après la création de ce premier administrateur, les nouveaux candidats peuvent
+créer un compte depuis `/admin/login` et demander l'accès. Leur compte reste un
+compte utilisateur tant qu'un administrateur existant n'a pas approuvé la
+demande dans **Console admin → Comptes → Demandes d’accès administrateur**.
+Cette approbation ajoute le rôle admin côté base de données ; aucun formulaire
+public ne peut s'attribuer ce rôle.
+
+Appliquez également `migrations/20261025150325_admin_access_requests.sql`
+avant d'activer ce parcours.

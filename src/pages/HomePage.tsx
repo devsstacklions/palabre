@@ -105,11 +105,8 @@ export const HomePage: React.FC = () => {
         {!user && (
           <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/15 pt-5 text-sm">
             <span className="text-emerald-50/70">Déjà membre ?</span>
-            <Link to="/login?mode=user" className="font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">
+            <Link to="/login" className="font-semibold text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">
               Connexion utilisateur
-            </Link>
-            <Link to="/login?mode=admin" className="font-semibold text-[#F4C28D] underline decoration-[#F4C28D]/40 underline-offset-4 hover:decoration-[#F4C28D]">
-              Espace administrateur
             </Link>
           </div>
         )}

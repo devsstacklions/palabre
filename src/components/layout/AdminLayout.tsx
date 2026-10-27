@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, LogOut, ShieldCheck, ClipboardList, Users } from 'lucide-react';
+import { AlertCircle, ArrowLeftRight, LayoutDashboard, LogOut, ShieldCheck, ClipboardList, Users } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const navigation = [
@@ -13,6 +13,8 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const { profile, user, logout } = useAuth();
   const navigate = useNavigate();
   const pathname = useLocation().pathname;
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
   const displayName = profile?.display_name || user?.email || 'Administrateur';
   const initial = displayName[0]?.toUpperCase() || 'A';
   const pageTitle =
@@ -23,14 +25,23 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
         : 'Vue d’ensemble';
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login', { replace: true });
+    setIsSigningOut(true);
+    setLogoutError('');
+    try {
+      await logout();
+      navigate('/admin/login', { replace: true });
+    } catch (error) {
+      console.error('Erreur de déconnexion administrateur:', error);
+      setLogoutError('La déconnexion a échoué. Vérifiez votre connexion puis réessayez.');
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
       <aside className="flex flex-col border-b border-slate-200 bg-white lg:min-h-screen lg:border-b-0 lg:border-r">
-        <Link to="/" className="flex items-center gap-3 px-5 py-5">
+        <Link to="/admin" className="flex items-center gap-3 px-5 py-5">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-palabre-primary text-white">
             <ShieldCheck size={21} aria-hidden="true" />
           </span>
@@ -58,6 +69,13 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               {label}
             </NavLink>
           ))}
+                  <NavLink
+            to="/search"
+            className="flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            <ArrowLeftRight size={18} aria-hidden="true" />
+            Interface utilisateur
+          </NavLink>
         </nav>
 
         <div className="hidden border-t border-slate-200 p-4 lg:block">
@@ -75,10 +93,11 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-4 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            disabled={isSigningOut}
+            className="mt-4 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:cursor-wait disabled:opacity-60"
           >
             <LogOut size={16} aria-hidden="true" />
-            Déconnexion
+            {isSigningOut ? 'Déconnexion…' : 'Déconnexion'}
           </button>
         </div>
       </aside>
@@ -94,15 +113,24 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             Rôle ADMIN
           </div>
         </header>
-        <div className="mx-auto w-full max-w-7xl p-5 sm:p-8">{children}</div>
+        <div className="mx-auto w-full max-w-7xl p-5 sm:p-8">
+          {logoutError && (
+            <div role="alert" className="mb-5 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+              <AlertCircle size={17} aria-hidden="true" />
+              <span>{logoutError}</span>
+            </div>
+          )}
+          {children}
+        </div>
         <div className="border-t border-slate-200 bg-white px-5 py-4 lg:hidden">
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center gap-2 text-sm font-medium text-slate-600"
+            disabled={isSigningOut}
+            className="flex items-center gap-2 text-sm font-medium text-slate-600 disabled:cursor-wait disabled:opacity-60"
           >
             <LogOut size={16} aria-hidden="true" />
-            Déconnexion
+            {isSigningOut ? 'Déconnexion…' : 'Déconnexion'}
           </button>
         </div>
       </div>

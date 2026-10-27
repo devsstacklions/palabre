@@ -10,7 +10,6 @@ import { SearchPage } from './pages/SearchPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 import { FicheDetailPage } from './pages/FicheDetailPage';
 import { NewFichePage } from './pages/NewFichePage';
-import { DashboardPage } from './pages/DashboardPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { AdminModerationPage } from './pages/AdminModerationPage';
@@ -19,6 +18,7 @@ import { AdminUsersPage } from './pages/AdminUsersPage';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { HelpPage } from './pages/HelpPage';
 import { AuthPage } from './pages/AuthPage';
+import { useAuth } from './contexts/AuthContext';
 
 export const App: React.FC = () => {
   return (
@@ -31,10 +31,24 @@ export const App: React.FC = () => {
 };
 
 const AppRoutes: React.FC = () => {
-  const isAdminArea = useLocation().pathname.startsWith('/admin');
+  const location = useLocation();
+  const { user, isAdmin, isLoading } = useAuth();
+  const isAdminArea = location.pathname.startsWith('/admin');
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-palabre-primary" />
+      </div>
+    );
+  }
+
+  if (user && isAdmin && location.pathname === '/admin/login') {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
-    <div className="flex flex-col min-h-screen bg-palabre-bg text-palabre-text">
+    <div className={`flex min-h-screen flex-col ${isAdminArea ? 'bg-slate-50 text-slate-900' : 'bg-palabre-bg text-palabre-text'}`}>
       {!isAdminArea && <Header />}
       <main className={`flex-1 w-full ${isAdminArea ? '' : 'max-w-7xl mx-auto px-4 py-6 sm:px-6'}`}>
         <Routes>
@@ -44,7 +58,15 @@ const AppRoutes: React.FC = () => {
               <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/fiches/:id" element={<FicheDetailPage />} />
               <Route path="/help" element={<HelpPage />} />
-              <Route path="/login" element={<AuthPage />} />
+              <Route
+                path="/login"
+                element={
+                  new URLSearchParams(location.search).get('mode') === 'admin'
+                    ? <Navigate to="/admin/login" replace />
+                    : <AuthPage />
+                }
+              />
+              <Route path="/admin/login" element={<AuthPage />} />
 
               {/* Routes Protégées Utilisateur */}
               <Route
@@ -57,11 +79,7 @@ const AppRoutes: React.FC = () => {
               />
               <Route
                 path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                }
+                element={<Navigate to={isAdmin ? '/admin' : '/search'} replace />}
               />
               <Route
                 path="/profile"

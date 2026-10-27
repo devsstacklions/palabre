@@ -61,7 +61,7 @@ export const NewFichePage: React.FC = () => {
       const created = await ficheService.createFiche(data, user.id);
       if (data.status === 'draft') {
         setSaveSuccessMessage('Brouillon sauvegardé avec succès !');
-        setTimeout(() => navigate('/dashboard'), 1500);
+        setTimeout(() => navigate('/search'), 1500);
       } else {
         navigate(`/fiches/${created.id}`);
       }

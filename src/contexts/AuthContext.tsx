@@ -15,7 +15,7 @@ interface AuthContextType {
   isModerator: boolean;
   isLoading: boolean;
   login: (data: LoginFormData) => Promise<UserRoleType>;
-  register: (data: RegisterFormData) => Promise<boolean>;
+  register: (data: RegisterFormData, confirmationPath?: string, adminPortal?: boolean) => Promise<{ hasSession: boolean; role: UserRoleType }>;
   logout: () => Promise<void>;
   updateProfile: (data: ProfileUpdateFormData) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -189,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (data: RegisterFormData) => {
+  const register = async (data: RegisterFormData, confirmationPath?: string, adminPortal = false) => {
     setIsLoading(true);
     try {
       const res = await authService.register({
@@ -198,16 +198,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         username: data.username,
         displayName: data.displayName,
         country: data.country,
-      });
+        adminPortal,
+      }, confirmationPath);
       setUser(res.session ? res.user : null);
       setSession(res.session);
+      let registeredRole: UserRoleType = 'user';
       if (res.session && res.user) {
-        await fetchUserData(res.user);
+        registeredRole = await fetchUserData(res.user);
       } else {
         setProfile(null);
         setRole('user');
       }
-      return Boolean(res.session);
+      return { hasSession: Boolean(res.session), role: registeredRole };
     } finally {
       setIsLoading(false);
     }

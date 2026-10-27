@@ -15,6 +15,7 @@ import {
 import { PAYS } from '../lib/constants';
 import { getAuthErrorMessage } from '../lib/auth-errors';
 import { isSupabaseConfigured } from '../lib/supabase';
+
 import {
   LogIn,
   UserPlus,
@@ -22,8 +23,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
-  UserRound,
-  LockKeyhole,
   Eye,
   EyeOff,
 } from 'lucide-react';
@@ -33,9 +32,8 @@ export const AuthPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [audience, setAudience] = useState<'user' | 'admin'>(
-    searchParams.get('mode') === 'admin' ? 'admin' : 'user'
-  );
+  const audience: 'user' | 'admin' = location.pathname.startsWith('/admin') ? 'admin' : 'user';
+  const isAdminPortal = audience === 'admin';
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -46,20 +44,20 @@ export const AuthPage: React.FC = () => {
 
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
+
+
   useEffect(() => {
-    const requestedMode = searchParams.get('mode');
-    setAudience(requestedMode === 'admin' ? 'admin' : 'user');
-    if (requestedMode === 'admin') {
+    if (isAdminPortal) {
       setTab('login');
     } else if (searchParams.get('tab') === 'register') {
       setTab('register');
-    } else if (requestedMode === 'user') {
+    } else if (searchParams.get('mode') === 'user') {
       setTab('login');
     }
     if (searchParams.get('confirmed') === '1') {
       setAuthSuccess('Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter.');
     }
-  }, [searchParams]);
+  }, [isAdminPortal, searchParams]);
 
   useEffect(() => {
     const confirmationError = searchParams.get('error') || searchParams.get('error_description');
@@ -77,26 +75,39 @@ export const AuthPage: React.FC = () => {
       const type = searchParams.get('type');
       if (type !== 'email' && type !== 'signup') {
         setAuthError('Le lien de confirmation est invalide. Demandez un nouvel e-mail de confirmation.');
-        navigate('/login', { replace: true });
+        navigate(isAdminPortal ? '/admin/login' : '/login', { replace: true });
         return;
       }
 
       void authService.confirmEmail(tokenHash, type)
-        .then(({ data }) => {
+        .then(async ({ data }) => {
           if (data.session) {
-            navigate('/dashboard', { replace: true });
+            if (isAdminPortal) {
+              try {
+                const role = await authService.getUserRole(data.session.user.id);
+                if (role !== 'admin') throw new Error('Admin role not assigned');
+                navigate('/admin', { replace: true });
+              } catch (error) {
+                console.error('Activation automatique de l’accès admin impossible après confirmation:', error);
+                try { await logout(); } catch { /* La session n’est pas ouverte si la confirmation n’en a créé aucune. */ }
+                setAuthError('Le rôle admin n’a pas été attribué. Vérifiez que la migration du portail admin est appliquée, puis reconnectez-vous.');
+                navigate('/admin/login', { replace: true });
+              }
+              return;
+            }
+            navigate('/search', { replace: true });
             return;
           }
           setAuthSuccess('Votre adresse e-mail est confirmée. Vous pouvez maintenant vous connecter.');
-          navigate('/login?confirmed=1', { replace: true });
+          navigate(isAdminPortal ? '/admin/login?confirmed=1' : '/login?confirmed=1', { replace: true });
         })
         .catch((error: unknown) => {
           setAuthError(getAuthErrorMessage(error, 'register'));
           setAuthSuccess('');
-          navigate('/login', { replace: true });
+          navigate(isAdminPortal ? '/admin/login' : '/login', { replace: true });
         });
     }
-  }, [navigate, searchParams]);
+  }, [isAdminPortal, navigate, searchParams]);
 
   // Formulaire Connexion
   const loginForm = useForm<LoginFormData>({
@@ -128,13 +139,18 @@ export const AuthPage: React.FC = () => {
     setAuthError('');
     setAuthSuccess('');
     try {
-      const role = await login(data);
+      let role = await login(data);
       if (audience === 'admin' && role !== 'admin') {
         await logout();
-        setAuthError('Ce compte ne possède pas les droits administrateur. Utilisez un compte admin autorisé ou choisissez la connexion utilisateur.');
+        setAuthError('Ce compte n’a pas encore le rôle administrateur. Appliquez la migration du portail admin dans Supabase, puis réessayez.');
         return;
       }
-      navigate(from || (role === 'admin' ? '/admin' : '/dashboard'), { replace: true });
+      if (audience === 'user' && role === 'admin') {
+        await logout();
+        setAuthError('Ce compte est administrateur. Connectez-vous depuis l’espace administrateur.');
+        return;
+      }
+      navigate(from || (role === 'admin' ? '/admin' : '/search'), { replace: true });
     } catch (err: unknown) {
       setAuthError(getAuthErrorMessage(err, 'login'));
     }
@@ -144,12 +160,29 @@ export const AuthPage: React.FC = () => {
     setAuthError('');
     setAuthSuccess('');
     try {
-      const hasSession = await authRegister(data);
-      if (hasSession) {
+      const registration = await authRegister(
+        data,
+        isAdminPortal ? '/admin/login?confirmed=1' : '/login?confirmed=1',
+        isAdminPortal
+      );
+      if (registration.hasSession) {
+        if (isAdminPortal) {
+          if (registration.role !== 'admin') {
+            await logout();
+            setAuthError('L’accès admin automatique n’est pas activé sur Supabase. Appliquez la migration du portail admin, puis réessayez.');
+            return;
+          }
+          navigate('/admin', { replace: true });
+          return;
+        }
         setAuthSuccess('Votre compte a été créé avec succès !');
-        navigate('/dashboard', { replace: true });
+        navigate('/search', { replace: true });
       } else {
-        setAuthSuccess('Votre compte a été créé. Consultez votre boîte e-mail et confirmez votre adresse avant de vous connecter.');
+        setAuthSuccess(
+          isAdminPortal
+            ? 'Votre compte admin a été créé. Confirmez votre adresse e-mail, puis connectez-vous ici : l’accès sera activé automatiquement.'
+            : 'Votre compte a été créé. Consultez votre boîte e-mail et confirmez votre adresse avant de vous connecter.'
+        );
         setTab('login');
       }
     } catch (err: unknown) {
@@ -169,11 +202,25 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto my-8 max-w-xl px-1 pb-16 sm:my-12">
+    <div className={isAdminPortal
+      ? 'flex min-h-screen flex-col items-center justify-center bg-slate-100 px-4 py-10'
+      : 'mx-auto my-8 max-w-xl px-1 pb-16 sm:my-12'
+    }>
+      {isAdminPortal && (
+        <div className="mb-5 flex items-center gap-3 text-slate-800">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white">
+            <ShieldCheck size={22} aria-hidden="true" />
+          </span>
+          <span>
+            <span className="block text-sm font-bold">Palabre</span>
+            <span className="block text-xs text-slate-500">Portail d’administration</span>
+          </span>
+        </div>
+      )}
       <div className="overflow-hidden rounded-3xl border border-palabre-border bg-white p-6 shadow-[0_24px_70px_-32px_rgba(20,50,40,0.32)] sm:p-9">
         <div className="mb-7 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-palabre-primary text-white shadow-lg shadow-emerald-900/15">
-            {tab === 'login' && <LogIn size={24} />}
+            {tab === 'login' && (isAdminPortal ? <ShieldCheck size={24} /> : <LogIn size={24} />)}
             {tab === 'register' && <UserPlus size={24} />}
             {tab === 'forgot' && <KeyRound size={24} />}
           </div>
@@ -182,14 +229,16 @@ export const AuthPage: React.FC = () => {
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-palabre-text sm:text-3xl">
             {tab === 'login' && (audience === 'admin' ? 'Accès administrateur' : 'Bon retour sur Palabre')}
-            {tab === 'register' && 'Rejoindre la communauté'}
+            {tab === 'register' && (isAdminPortal ? 'Créer un compte admin' : 'Rejoindre la communauté')}
             {tab === 'forgot' && 'Réinitialiser votre mot de passe'}
           </h1>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-palabre-muted">
             {tab === 'login' && (audience === 'admin'
               ? 'Connectez-vous avec votre compte administrateur Palabre.'
               : 'Connectez-vous pour retrouver vos fiches, favoris et confirmations.')}
-            {tab === 'register' && 'Partagez vos solutions techniques avec les devs africains.'}
+            {tab === 'register' && (isAdminPortal
+              ? 'Créez votre compte admin et accédez immédiatement à la console.'
+              : 'Partagez vos solutions techniques avec les devs africains.')}
             {tab === 'forgot' && 'Saisissez votre e-mail pour recevoir le lien de réinitialisation.'}
           </p>
         </div>
@@ -205,73 +254,8 @@ export const AuthPage: React.FC = () => {
           </div>
         )}
 
-        {tab === 'login' && (
-          <section className="mb-6" aria-label="Choisir un espace de connexion">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Choisissez votre espace
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                aria-pressed={audience === 'user'}
-                onClick={() => {
-                  setAudience('user');
-                  setAuthError('');
-                  setAuthSuccess('');
-                }}
-                className={`group flex min-h-[76px] items-center gap-3 rounded-2xl border p-3 text-left transition-all ${
-                  audience === 'user'
-                    ? 'border-palabre-primary bg-palabre-primaryLight ring-2 ring-palabre-primary/10'
-                    : 'border-slate-200 bg-white hover:border-palabre-primary/40 hover:bg-slate-50'
-                }`}
-              >
-                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                  audience === 'user' ? 'bg-palabre-primary text-white' : 'bg-slate-100 text-slate-600'
-                }`}>
-                  <UserRound size={19} aria-hidden="true" />
-                </span>
-                <span>
-                  <span className="block text-sm font-bold text-palabre-text">Utilisateur</span>
-                  <span className="mt-0.5 block text-[11px] text-palabre-muted">Mon espace</span>
-                </span>
-              </button>
-              <button
-                type="button"
-                aria-pressed={audience === 'admin'}
-                onClick={() => {
-                  setAudience('admin');
-                  setTab('login');
-                  setAuthError('');
-                  setAuthSuccess('');
-                }}
-                className={`group flex min-h-[76px] items-center gap-3 rounded-2xl border p-3 text-left transition-all ${
-                  audience === 'admin'
-                    ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-500/10'
-                    : 'border-slate-200 bg-white hover:border-amber-400/60 hover:bg-amber-50/50'
-                }`}
-              >
-                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                  audience === 'admin' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700'
-                }`}>
-                  <ShieldCheck size={20} aria-hidden="true" />
-                </span>
-                <span>
-                  <span className="block text-sm font-bold text-palabre-text">Administrateur</span>
-                  <span className="mt-0.5 block text-[11px] text-palabre-muted">Accès sécurisé</span>
-                </span>
-              </button>
-            </div>
-            {audience === 'admin' && (
-              <p className="mt-3 flex items-start gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-600">
-                <LockKeyhole size={15} className="mt-0.5 shrink-0 text-palabre-primary" aria-hidden="true" />
-                Le rôle administrateur est vérifié de façon sécurisée après connexion. Ce choix ne modifie pas les autorisations du compte.
-              </p>
-            )}
-          </section>
-        )}
-
         {/* Onglets */}
-        <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1.5 mb-6 text-sm font-semibold">
+        <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1.5 text-sm font-semibold">
           <button
             type="button"
             onClick={() => {
@@ -289,13 +273,12 @@ export const AuthPage: React.FC = () => {
           </button>
           <button
             type="button"
-            disabled={audience === 'admin'}
             onClick={() => {
               setTab('register');
               setAuthError('');
               setAuthSuccess('');
             }}
-            className={`min-h-10 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${
+            className={`min-h-10 rounded-lg transition-colors cursor-pointer ${
               tab === 'register'
                 ? 'bg-white text-palabre-text shadow-sm'
                 : 'text-palabre-muted hover:text-palabre-text'
@@ -556,7 +539,11 @@ export const AuthPage: React.FC = () => {
               disabled={registerForm.formState.isSubmitting}
               className="w-full py-2.5 bg-palabre-primary hover:bg-palabre-primaryHover text-white rounded-btn text-sm font-semibold transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
-              {registerForm.formState.isSubmitting ? 'Création en cours...' : 'Créer mon compte'}
+              {registerForm.formState.isSubmitting
+                ? 'Création en cours...'
+                : isAdminPortal
+                  ? 'Créer mon compte administrateur'
+                  : 'Créer mon compte'}
             </button>
           </form>
         )}

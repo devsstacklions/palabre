@@ -24,17 +24,19 @@ export const authService = {
     username: string;
     displayName: string;
     country?: string;
-  }) {
+    adminPortal?: boolean;
+  }, confirmationPath = '/login?confirmed=1') {
     requireAuthConfiguration();
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
-        emailRedirectTo: `${getAppOrigin()}/login?confirmed=1`,
+        emailRedirectTo: `${getAppOrigin()}${confirmationPath}`,
         data: {
           username: data.username,
           display_name: data.displayName,
           country: data.country || '',
+          palabre_portal: data.adminPortal ? 'admin' : 'user',
         },
       },
     });
@@ -64,7 +66,8 @@ export const authService = {
   },
 
   async logout() {
-    const { error } = await supabase.auth.signOut();
+    // End this browser session without revoking the administrator's other sessions.
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) throw error;
   },
 

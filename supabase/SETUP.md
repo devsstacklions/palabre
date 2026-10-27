@@ -28,10 +28,12 @@ intégral des migrations :
 
 1. `migrations/20260218000000_init_palabre_schema.sql`
 2. `migrations/20261020000000_admin_access_controls.sql`
+3. `migrations/20261025150325_admin_access_requests.sql`
 
 La première migration crée les tables, le déclencheur de profil à l’inscription
 et les politiques RLS. La seconde autorise les administrateurs à consulter le
-répertoire des profils sans exposer les adresses e-mail.
+répertoire des profils sans exposer les adresses e-mail. La troisième crée les
+demandes d’accès admin protégées par RLS et la validation atomique des demandes.
 
 Ces migrations doivent être exécutées dans le projet dont l’URL est définie
 dans `.env.local`. Si la connexion échoue après la validation du mot de passe,
@@ -56,8 +58,11 @@ Dans **Authentication → URL Configuration** :
 - ajoutez `http://localhost:5173/login` et
   `http://127.0.0.1:5173/login` dans **Redirect URLs** si vous utilisez ces deux
   adresses pour ouvrir l’application ;
+- ajoutez également les URL `/admin/login` correspondantes pour confirmer les
+  comptes créés depuis le portail admin ;
 - avant le déploiement, définissez la véritable URL HTTPS de Palabre comme Site
-  URL et ajoutez sa page `/login` à la liste des URL autorisées.
+  URL et ajoutez ses pages `/login` et `/admin/login` à la liste des URL
+  autorisées.
 
 Dans **Authentication → Email Templates → Confirm signup**, le lien par défaut
 `{{ .ConfirmationURL }}` peut être conservé. Si vous personnalisez ce modèle,
@@ -85,10 +90,15 @@ configuration :
 npm run dev
 ```
 
-Créez un compte depuis **Créer un compte**. Si la confirmation e-mail est
-activée, cliquez sur le lien reçu avant de vous connecter. L’attribution du rôle
-`admin` s’effectue séparément et uniquement côté Supabase ; choisir « Espace
-administrateur » sur la page de connexion ne donne aucun privilège.
+Créez un compte depuis le portail utilisateur ou envoyez une demande depuis
+`/admin/login`. Les demandes admin restent sans privilège jusqu’à leur
+approbation par un administrateur existant, dans **Comptes → Demandes d’accès
+administrateur**. Si la confirmation e-mail est activée, cliquez sur le lien
+reçu puis reconnectez-vous au portail admin pour envoyer la demande.
+
+L’inscription publique ne peut jamais attribuer le rôle `admin`. Pour créer le
+premier administrateur, suivez `ADMIN_SETUP.md` ; les administrateurs suivants
+doivent être approuvés depuis la console.
 
 Pour diagnostiquer la configuration, vérifiez que le navigateur ne signale pas
 de clé API invalide et que les migrations sont bien appliquées. Les variables

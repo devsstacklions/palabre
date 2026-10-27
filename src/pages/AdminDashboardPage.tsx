@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertCircle, ArrowRight, BookOpenCheck, RefreshCw, ShieldAlert, Users } from 'lucide-react';
+import { Activity, AlertCircle, ArrowRight, BookOpenCheck, RefreshCw, ShieldAlert, Users } from 'lucide-react';
 import { adminService, AdminOverview } from '../services/admin.service';
 import { formatRelativeDate } from '../lib/utils';
+import { ActivityChart } from '../components/admin/ActivityChart';
 
 const metricCards = [
   { key: 'userCount', label: 'Comptes', icon: Users, color: 'text-sky-700 bg-sky-50' },
@@ -17,6 +18,12 @@ const metricCards = [
     label: 'Signalements ouverts',
     icon: ShieldAlert,
     color: 'text-amber-700 bg-amber-50',
+  },
+  {
+    key: 'activeContributorCount',
+    label: 'Contributeurs actifs · 14 j',
+    icon: Activity,
+    color: 'text-violet-700 bg-violet-50',
   },
 ] as const;
 
@@ -75,7 +82,7 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
       )}
 
-      <section aria-label="Indicateurs de la plateforme" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <section aria-label="Indicateurs de la plateforme" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metricCards.map(({ key, label, icon: Icon, color }) => (
           <article key={key} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
@@ -91,6 +98,8 @@ export const AdminDashboardPage: React.FC = () => {
           </article>
         ))}
       </section>
+
+      {overview && <ActivityChart data={overview.dailyActivity} />}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -155,7 +164,7 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       <p className="text-xs leading-5 text-slate-500">
-        Les comptes actifs et l’historique des actions administratives ne sont pas suivis par le schéma actuel ; aucune estimation n’est affichée.
+        Le graphique compte les inscriptions, fiches publiées, confirmations, variantes et signalements enregistrés. Les vues de pages et les connexions ne sont pas suivies par la base actuelle.
       </p>
     </div>
   );

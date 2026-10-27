@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   register: vi.fn(),
   requestPasswordReset: vi.fn(),
   confirmEmail: vi.fn(),
+  requestAdminAccess: vi.fn(),
 }));
 
 vi.mock('../contexts/AuthContext', () => ({
@@ -26,6 +27,12 @@ vi.mock('../services/auth.service', () => ({
   },
 }));
 
+vi.mock('../services/admin.service', () => ({
+  adminService: {
+    requestAdminAccess: mocks.requestAdminAccess,
+  },
+}));
+
 vi.mock('../lib/supabase', () => ({
   isSupabaseConfigured: true,
   supabase: {},
@@ -38,6 +45,7 @@ const renderAuthPage = (entry: string) =>
     <MemoryRouter initialEntries={[entry]}>
       <Routes>
         <Route path="/login" element={<AuthPage />} />
+        <Route path="/admin/login" element={<AuthPage />} />
         <Route path="*" element={<CurrentPath />} />
       </Routes>
     </MemoryRouter>
@@ -48,24 +56,21 @@ describe('AuthPage connection choices', () => {
     vi.clearAllMocks();
     mocks.logout.mockResolvedValue(undefined);
     mocks.confirmEmail.mockResolvedValue({ data: { session: null } });
+    mocks.requestAdminAccess.mockResolvedValue('pending');
   });
 
-  it('affiche les espaces utilisateur et admin, et sélectionne le mode admin via le lien', () => {
-    renderAuthPage('/login?mode=admin');
+  it('affiche un portail admin indépendant avec demande de création de compte', () => {
+    renderAuthPage('/admin/login');
 
-    expect(screen.getByRole('button', { name: /Utilisateur Mon espace/i })).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    );
-    expect(
-      screen.getByRole('button', { name: /Administrateur Accès sécurisé/i })
-    ).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText(/Ce choix ne modifie pas les autorisations du compte/i)).toBeInTheDocument();
+    expect(screen.getByText('Portail d’administration')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Accès administrateur' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Créer un compte' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Connexion utilisateur/i })).not.toBeInTheDocument();
   });
 
-  it('refuse le portail admin à un compte non administrateur et ferme sa session', async () => {
+  it('soumet une demande et ferme la session d’un compte non-admin sur le portail admin', async () => {
     mocks.login.mockResolvedValue('user');
-    renderAuthPage('/login?mode=admin');
+    renderAuthPage('/admin/login');
 
     fireEvent.change(screen.getByPlaceholderText('dev@exemple.africa'), {
       target: { value: 'member@example.com' },
@@ -73,17 +78,52 @@ describe('AuthPage connection choices', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {
       target: { value: 'password-valid' },
     });
-    fireEvent.click(screen.getAllByRole('button', { name: 'Se connecter' })[1]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Se connecter' }).at(-1)!);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Ce compte ne possède pas les droits administrateur.'
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Votre demande d’accès administrateur est en attente de validation.'
     );
+    expect(mocks.requestAdminAccess).toHaveBeenCalledOnce();
+    expect(mocks.logout).toHaveBeenCalledOnce();
+  });
+
+  it('crée un compte depuis le portail admin puis transmet la demande pour approbation', async () => {
+    mocks.register.mockResolvedValue(true);
+    renderAuthPage('/admin/login');
+    fireEvent.click(screen.getByRole('button', { name: 'Créer un compte' }));
+
+    fireEvent.change(screen.getByPlaceholderText('Mouhamed Tine'), {
+      target: { value: 'Admin en attente' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('tine_dev'), {
+      target: { value: 'admin_en_attente' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('tine@exemple.com'), {
+      target: { value: 'admin@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('8 caractères min.'), {
+      target: { value: 'password-valid' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Répétez'), {
+      target: { value: 'password-valid' },
+    });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Créer le compte et demander l’accès' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'votre demande d’accès administrateur est envoyée'
+    );
+    expect(mocks.register).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'admin@example.com' }),
+      '/admin/login?confirmed=1'
+    );
+    expect(mocks.requestAdminAccess).toHaveBeenCalledOnce();
     expect(mocks.logout).toHaveBeenCalledOnce();
   });
 
   it('redirige un administrateur authentifié vers la console admin', async () => {
     mocks.login.mockResolvedValue('admin');
-    renderAuthPage('/login?mode=admin');
+    renderAuthPage('/admin/login');
 
     fireEvent.change(screen.getByPlaceholderText('dev@exemple.africa'), {
       target: { value: 'admin@example.com' },
@@ -91,14 +131,33 @@ describe('AuthPage connection choices', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {
       target: { value: 'password-valid' },
     });
-    fireEvent.click(screen.getAllByRole('button', { name: 'Se connecter' })[1]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Se connecter' }).at(-1)!);
 
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('/admin'));
     expect(mocks.logout).not.toHaveBeenCalled();
   });
 
+  it('refuse le portail utilisateur à un administrateur et ferme sa session', async () => {
+    mocks.login.mockResolvedValue('admin');
+    renderAuthPage('/login?mode=user');
+
+    fireEvent.change(screen.getByPlaceholderText('dev@exemple.africa'), {
+      target: { value: 'admin@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), {
+      target: { value: 'password-valid' },
+    });
+    fireEvent.click(screen.getAllByRole('button', { name: 'Se connecter' }).at(-1)!);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Ce compte est administrateur. Connectez-vous depuis l’espace administrateur.'
+    );
+    expect(mocks.logout).toHaveBeenCalledOnce();
+  });
+
   it('affiche ou masque le mot de passe sur l’écran de connexion', () => {
     renderAuthPage('/login');
+    expect(screen.queryByText('Portail d’administration')).not.toBeInTheDocument();
     const password = screen.getByPlaceholderText('••••••••');
 
     expect(password).toHaveAttribute('type', 'password');

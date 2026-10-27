@@ -19,9 +19,9 @@ export const AdminUsersPage: React.FC = () => {
     try {
       setResult(await adminService.getUsers(search, page, PAGE_SIZE));
     } catch (cause) {
-      console.error('Erreur de chargement du répertoire admin:', cause);
+      console.error('Erreur de chargement des comptes:', cause);
       setResult(null);
-      setError('Impossible de charger le répertoire des comptes. Réessayez.');
+      setError('Impossible de charger les comptes. Vérifiez la connexion Supabase puis réessayez.');
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +88,10 @@ export const AdminUsersPage: React.FC = () => {
 
         {isLoading ? (
           <p className="px-5 py-8 text-center text-sm text-slate-500">Chargement des comptes…</p>
+        ) : error ? (
+          <p className="px-5 py-8 text-center text-sm text-red-700">
+            Le répertoire des comptes n’a pas pu être chargé.
+          </p>
         ) : result?.users.length ? (
           <>
             <div className="overflow-x-auto">
