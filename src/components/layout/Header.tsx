@@ -67,6 +67,9 @@ export const Header: React.FC = () => {
           <NavLink to="/search" className={navLinkClass}>
             Explorer
           </NavLink>
+          <NavLink to="/entraide" className={navLinkClass}>
+            Entraide
+          </NavLink>
           <NavLink to="/categories" className={navLinkClass}>
             Catégories
           </NavLink>
@@ -170,6 +173,13 @@ export const Header: React.FC = () => {
             className="block px-3 py-2 rounded-lg text-sm font-medium text-palabre-text hover:bg-palabre-bg"
           >
             Explorer les solutions
+          </NavLink>
+          <NavLink
+            to="/entraide"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-sm font-medium text-palabre-text hover:bg-palabre-bg"
+          >
+            Entraide technique
           </NavLink>
           <NavLink
             to="/categories"

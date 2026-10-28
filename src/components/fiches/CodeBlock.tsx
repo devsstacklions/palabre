@@ -26,7 +26,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'Code' })
   return (
     <div className="relative rounded-xl overflow-hidden my-3 border border-palabre-border shadow-sm group">
       <div className="flex items-center justify-between px-4 py-2 bg-[#080E0C] border-b border-[#1C2C26] text-xs text-[#9DB0A8]">
-        <span className="font-mono uppercase tracking-wider">{language}</span>
+        <span className="font-mono uppercase tracking-wider">{language.toUpperCase()}</span>
         <button
           type="button"
           onClick={handleCopy}

@@ -38,10 +38,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const [userProfile, userRole] = await Promise.all([
+      let [userProfile, userRole] = await Promise.all([
         authService.getUserProfile(currentUser.id),
         authService.getUserRole(currentUser.id),
       ]);
+
+      if (!userProfile) {
+        try {
+          userProfile = await profileService.ensureProfile(currentUser);
+        } catch (err) {
+          console.warn('Auto-création du profil dans Supabase non aboutie:', err);
+        }
+      }
 
       if (userProfile) {
         setProfile(userProfile);

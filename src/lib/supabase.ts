@@ -10,8 +10,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(
-  supabaseUrl || 'https://pwisquamqrkqbjwtglzj.supabase.co',
-  supabaseAnonKey || 'sb_publishable_czxDzeDmKHj868HWIFd8fg_6osH1',
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,

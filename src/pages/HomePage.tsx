@@ -93,6 +93,12 @@ export const HomePage: React.FC = () => {
             <ArrowRight size={15} />
           </Link>
           <Link
+            to="/entraide"
+            className="px-5 py-2.5 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 text-emerald-900 rounded-btn font-semibold text-sm transition-colors shadow-2xs inline-flex items-center gap-2"
+          >
+            <span>Espace Entraide</span>
+          </Link>
+          <Link
             to="/fiches/new"
             className="px-5 py-2.5 bg-white border border-palabre-border hover:bg-slate-50 text-palabre-text rounded-btn font-semibold text-sm transition-colors shadow-xs"
           >
@@ -180,6 +186,28 @@ export const HomePage: React.FC = () => {
             </Link>
           </div>
         )}
+      </section>
+
+      {/* Espace Entraide Callout */}
+      <section className="bg-gradient-to-r from-teal-900 to-[#0F5C4A] text-white rounded-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
+        <div className="space-y-2 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-xs">
+            <Sparkles size={13} />
+            <span>Nouveau · Entraide Technique</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold">Bloqué sur un bug ou une intégration ?</h2>
+          <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+            Détaillez vos messages d'erreur, ajoutez vos captures d'écran et posez vos questions aux développeurs africains.
+            Une fois résolu, transformez votre cas en fiche de terrain !
+          </p>
+        </div>
+        <Link
+          to="/entraide"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-palabre-primary hover:bg-emerald-50 rounded-btn font-semibold text-sm transition-colors shrink-0 shadow-sm"
+        >
+          <span>Accéder à l'entraide</span>
+          <ArrowRight size={15} />
+        </Link>
       </section>
 
       {/* Une validation honnête */}

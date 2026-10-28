@@ -3,10 +3,12 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ficheService } from '../services/fiche.service';
 import { favoriteService } from '../services/favorite.service';
+import { entraideService } from '../services/entraide.service';
 import { FicheCard } from '../components/fiches/FicheCard';
-import { Fiche } from '../types';
+import { QuestionStatusBadge } from '../components/entraide/QuestionStatusBadge';
+import { Fiche, Question } from '../types';
 import { PAYS, TECHNOLOGIES } from '../lib/constants';
-import { FileText, Bookmark, Settings, Edit3, Trash2, CheckCircle2 } from 'lucide-react';
+import { FileText, Bookmark, Settings, Edit3, Trash2, CheckCircle2, HelpCircle, MessageSquare, } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   const { user, profile, updateProfile, logout } = useAuth();
@@ -17,6 +19,7 @@ export const ProfilePage: React.FC = () => {
   const [myFiches, setMyFiches] = useState<Fiche[]>([]);
   const [drafts, setDrafts] = useState<Fiche[]>([]);
   const [favorites, setFavorites] = useState<Fiche[]>([]);
+  const [myQuestions, setMyQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Settings form state
@@ -45,11 +48,13 @@ export const ProfilePage: React.FC = () => {
       ficheService.getUserFiches(user.id),
       ficheService.getUserDrafts(user.id),
       favoriteService.getUserFavorites(user.id),
+      entraideService.getUserQuestions(user.id),
     ])
-      .then(([f, d, fav]) => {
+      .then(([f, d, fav, q]) => {
         setMyFiches(f);
         setDrafts(d);
         setFavorites(fav);
+        setMyQuestions(q);
       })
       .catch((err) => console.error('Erreur profil données:', err))
       .finally(() => setIsLoading(false));
@@ -154,6 +159,18 @@ export const ProfilePage: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setTab('q')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
+            currentTab === 'q'
+              ? 'border-palabre-primary text-palabre-text'
+              : 'border-transparent text-palabre-muted hover:text-palabre-text'
+          }`}
+        >
+          <HelpCircle size={15} />
+          <span>Questions ({myQuestions.length})</span>
+        </button>
+
+        <button
           onClick={() => setTab('set')}
           className={`flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap ${
             currentTab === 'set'
@@ -178,7 +195,18 @@ export const ProfilePage: React.FC = () => {
           ) : myFiches.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {myFiches.map((fiche) => (
-                <FicheCard key={fiche.id} fiche={fiche} />
+                <div key={fiche.id} className="space-y-1">
+                  <FicheCard fiche={fiche} />
+                  <div className="flex justify-end pr-1">
+                    <Link
+                      to={`/fiches/${fiche.id}/edit`}
+                      className="text-xs font-semibold text-palabre-primary hover:underline inline-flex items-center gap-1"
+                    >
+                      <Edit3 size={12} />
+                      <span>Modifier cette fiche</span>
+                    </Link>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
@@ -258,6 +286,68 @@ export const ProfilePage: React.FC = () => {
                 className="px-4 py-2 bg-palabre-primary text-white rounded-btn text-xs font-semibold inline-block"
               >
                 Découvrir des solutions
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {currentTab === 'q' && (
+        <div className="space-y-3">
+          {myQuestions.length > 0 ? (
+            myQuestions.map((q) => (
+              <div
+                key={q.id}
+                className="bg-white border border-palabre-border rounded-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <QuestionStatusBadge status={q.status} />
+                    <span className="text-xs font-semibold text-palabre-text">{q.technology}</span>
+                    {q.framework && (
+                      <span className="text-xs text-palabre-muted">· {q.framework}</span>
+                    )}
+                  </div>
+                  <Link
+                    to={`/entraide/${q.id}`}
+                    className="text-sm font-bold text-palabre-text hover:text-palabre-primary line-clamp-1"
+                  >
+                    {q.title}
+                  </Link>
+                  <p className="text-xs text-palabre-muted line-clamp-1 mt-0.5">{q.description}</p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
+                    <MessageSquare size={13} />
+                    <span>{q.answers_count} rép.</span>
+                  </span>
+                  <Link
+                    to={`/entraide/${q.id}`}
+                    className="px-3 py-1.5 bg-palabre-bg border border-palabre-border hover:bg-slate-50 text-palabre-text rounded-btn text-xs font-semibold"
+                  >
+                    Voir
+                  </Link>
+                  <Link
+                    to={`/entraide/${q.id}/edit`}
+                    className="px-3 py-1.5 bg-palabre-primary text-white rounded-btn text-xs font-semibold hover:bg-[#0c4a3b]"
+                  >
+                    Modifier
+                  </Link>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-white border border-palabre-border rounded-card p-8 text-center space-y-3">
+              <h2 className="text-base font-bold text-palabre-text">Aucune question d'entraide</h2>
+              <p className="text-xs text-palabre-muted max-w-sm mx-auto">
+                Vous n'avez pas encore posé de question sur l'espace d'entraide technique.
+              </p>
+              <Link
+                to="/entraide/new"
+                className="px-4 py-2 bg-palabre-primary text-white rounded-btn text-xs font-semibold inline-block"
+              >
+                Poser un problème
               </Link>
             </div>
           )}

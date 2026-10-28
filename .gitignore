@@ -23,7 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment
-.env.local
-.env.*.local
+# Supabase temporary files
+supabase/.temp/
 
+# Environment files
+.env
+.env.*
+!.env.example
+supabase_remote_schema.sql

@@ -3,7 +3,7 @@ export type FicheStatus = 'draft' | 'pending' | 'published' | 'archived' | 'hidd
 export type ReportReason = 'misleading' | 'version_incompatibility' | 'obsolete' | 'security_risk' | 'other';
 export type ReportStatus = 'open' | 'resolved' | 'rejected';
 export type UserRoleType = 'admin' | 'moderator' | 'contributor' | 'user';
-export type NotificationType = 'confirmation' | 'report' | 'variant' | 'moderation' | 'system';
+export type NotificationType = 'confirmation' | 'comment' | 'report' | 'variant' | 'moderation' | 'system';
 
 export interface Profile {
   id: string;
@@ -54,6 +54,9 @@ export interface Fiche {
   author_id: string;
   category_id?: string | null;
   confirmations_count: number;
+  negative_feedback_count: number;
+  views_count: number;
+  comments_count: number;
   last_validated_at?: string | null;
   created_at: string;
   updated_at: string;
@@ -62,6 +65,16 @@ export interface Fiche {
   category?: Category | null;
   variants_count?: number;
   is_favorite?: boolean;
+}
+
+export interface FicheComment {
+  id: string;
+  fiche_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  user?: Profile | null;
 }
 
 export interface FicheConfirmation {
@@ -140,3 +153,69 @@ export interface SearchFilters {
   sortBy?: 'recent' | 'confirmations' | 'relevance';
 }
 
+// ===================================================================
+// ESPACE ENTRAIDE TECHNIQUE
+// ===================================================================
+
+export type QuestionStatus = 'draft' | 'open' | 'in_progress' | 'resolved' | 'closed' | 'hidden';
+
+export interface Question {
+  id: string;
+  title: string;
+  description: string;
+  technology: string;
+  language?: string | null;
+  framework?: string | null;
+  error_message?: string | null;
+  expected_result?: string | null;
+  tools_version?: string | null;
+  environment?: string | null;
+  code_snippet?: string | null;
+  code_language?: string | null;
+  attachments: string[];
+  status: QuestionStatus;
+  author_id: string;
+  accepted_answer_id?: string | null;
+  answers_count: number;
+  views_count: number;
+  created_at: string;
+  updated_at: string;
+  author?: Profile | null;
+  accepted_answer?: QuestionAnswer | null;
+}
+
+export interface QuestionAnswer {
+  id: string;
+  question_id: string;
+  author_id: string;
+  content: string;
+  code_snippet?: string | null;
+  code_language?: string | null;
+  is_solution: boolean;
+  created_at: string;
+  updated_at: string;
+  author?: Profile | null;
+}
+
+export interface QuestionReport {
+  id: string;
+  question_id?: string | null;
+  answer_id?: string | null;
+  user_id: string;
+  reason: 'spam' | 'inappropriate' | 'security_risk' | 'wrong_category' | 'other';
+  description: string;
+  status: 'open' | 'resolved' | 'rejected';
+  moderation_notes?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  created_at: string;
+  reporter?: Profile | null;
+  question?: Question | null;
+}
+
+export interface QuestionFilters {
+  query?: string;
+  technology?: string;
+  status?: QuestionStatus | 'all';
+  sortBy?: 'recent' | 'unanswered' | 'resolved' | 'views';
+}

@@ -16,6 +16,9 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { AdminModerationPage } from './pages/AdminModerationPage';
 import { HelpPage } from './pages/HelpPage';
 import { AuthPage } from './pages/AuthPage';
+import { EntraideListPage } from './pages/EntraideListPage';
+import { EntraideDetailPage } from './pages/EntraideDetailPage';
+import { NewQuestionPage } from './pages/NewQuestionPage';
 
 export const App: React.FC = () => {
   return (
@@ -30,12 +33,40 @@ export const App: React.FC = () => {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/fiches/:id" element={<FicheDetailPage />} />
+              <Route path="/entraide" element={<EntraideListPage />} />
+              <Route path="/entraide/:id" element={<EntraideDetailPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="/login" element={<AuthPage />} />
 
               {/* Routes Protégées Utilisateur */}
               <Route
+                path="/entraide/new"
+                element={
+                  <ProtectedRoute>
+                    <NewQuestionPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/entraide/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <NewQuestionPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Routes Protégées Utilisateur */}
+              <Route
                 path="/fiches/new"
+                element={
+                  <ProtectedRoute>
+                    <NewFichePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/fiches/:id/edit"
                 element={
                   <ProtectedRoute>
                     <NewFichePage />

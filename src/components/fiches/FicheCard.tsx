@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Fiche } from '../../types';
 import { Badge } from '../ui/Badge';
 import { formatRelativeDate } from '../../lib/utils';
-import { CheckCircle2, Bookmark } from 'lucide-react';
+import { CheckCircle2, Bookmark, Eye, MessageSquare, AlertTriangle } from 'lucide-react';
 
 interface FicheCardProps {
   fiche: Fiche;
@@ -39,10 +39,16 @@ export const FicheCard: React.FC<FicheCardProps> = ({
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge status={fiche.verification_status} />
-            <span className="text-xs text-palabre-muted flex items-center gap-1 font-medium">
-              <CheckCircle2 size={13} className="text-palabre-primary" />
+            <span className="text-xs text-palabre-muted flex items-center gap-1 font-medium" title="Confirmations positives">
+              <CheckCircle2 size={13} className="text-palabre-ok" />
               {fiche.confirmations_count} confirmation{fiche.confirmations_count > 1 ? 's' : ''}
             </span>
+            {Boolean(fiche.negative_feedback_count && fiche.negative_feedback_count > 0) && (
+              <span className="text-xs text-red-600 flex items-center gap-1 font-medium" title="Signalements ou échecs signalés">
+                <AlertTriangle size={12} />
+                {fiche.negative_feedback_count} contesté{fiche.negative_feedback_count > 1 ? 's' : ''}
+              </span>
+            )}
           </div>
 
           {onToggleFavorite && (
@@ -92,9 +98,19 @@ export const FicheCard: React.FC<FicheCardProps> = ({
       </div>
 
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-palabre-muted">
-        <span>
-          Dernière vérification : {formatRelativeDate(fiche.last_validated_at || fiche.created_at)}
-        </span>
+        <div className="flex items-center gap-3">
+          <span>
+            {formatRelativeDate(fiche.last_validated_at || fiche.created_at)}
+          </span>
+          <span className="flex items-center gap-1" title={`${fiche.views_count || 0} consultations`}>
+            <Eye size={12} className="text-slate-400" />
+            <span>{fiche.views_count || 0}</span>
+          </span>
+          <span className="flex items-center gap-1" title={`${fiche.comments_count || 0} commentaires`}>
+            <MessageSquare size={12} className="text-slate-400" />
+            <span>{fiche.comments_count || 0}</span>
+          </span>
+        </div>
         <span className="font-medium text-slate-700 truncate max-w-[120px]" title={authorName}>
           {authorName}
         </span>
