@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+=======
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate, useLocation } from 'react-router-dom';
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/auth.service';
 import {
@@ -13,6 +20,7 @@ import {
   ForgotPasswordFormData,
 } from '../schemas/auth.schema';
 import { PAYS } from '../lib/constants';
+<<<<<<< HEAD
 import { getAuthErrorMessage } from '../lib/auth-errors';
 import { isSupabaseConfigured } from '../lib/supabase';
 
@@ -108,6 +116,19 @@ export const AuthPage: React.FC = () => {
         });
     }
   }, [isAdminPortal, navigate, searchParams]);
+=======
+import { LogIn, UserPlus, KeyRound, CheckCircle2, AlertCircle } from 'lucide-react';
+
+export const AuthPage: React.FC = () => {
+  const [tab, setTab] = useState<'login' | 'register' | 'forgot'>('login');
+  const [authError, setAuthError] = useState('');
+  const [authSuccess, setAuthSuccess] = useState('');
+  const { login, register: authRegister } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = (location.state as any)?.from?.pathname || '/dashboard';
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 
   // Formulaire Connexion
   const loginForm = useForm<LoginFormData>({
@@ -139,6 +160,7 @@ export const AuthPage: React.FC = () => {
     setAuthError('');
     setAuthSuccess('');
     try {
+<<<<<<< HEAD
       let role = await login(data);
       if (audience === 'admin' && role !== 'admin') {
         await logout();
@@ -153,6 +175,12 @@ export const AuthPage: React.FC = () => {
       navigate(from || (role === 'admin' ? '/admin' : '/search'), { replace: true });
     } catch (err: unknown) {
       setAuthError(getAuthErrorMessage(err, 'login'));
+=======
+      await login(data);
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setAuthError(err.message || 'Identifiant ou mot de passe incorrect.');
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     }
   };
 
@@ -160,6 +188,7 @@ export const AuthPage: React.FC = () => {
     setAuthError('');
     setAuthSuccess('');
     try {
+<<<<<<< HEAD
       const registration = await authRegister(
         data,
         isAdminPortal ? '/admin/login?confirmed=1' : '/login?confirmed=1',
@@ -187,6 +216,13 @@ export const AuthPage: React.FC = () => {
       }
     } catch (err: unknown) {
       setAuthError(getAuthErrorMessage(err, 'register'));
+=======
+      await authRegister(data);
+      setAuthSuccess('Votre compte a été créé avec succès !');
+      setTimeout(() => navigate('/dashboard'), 1000);
+    } catch (err: any) {
+      setAuthError(err.message || 'Erreur lors de la création du compte.');
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     }
   };
 
@@ -196,12 +232,18 @@ export const AuthPage: React.FC = () => {
     try {
       await authService.requestPasswordReset(data.email);
       setAuthSuccess('Un lien de réinitialisation a été envoyé à votre adresse e-mail.');
+<<<<<<< HEAD
     } catch (err: unknown) {
       setAuthError(getAuthErrorMessage(err, 'reset'));
+=======
+    } catch (err: any) {
+      setAuthError(err.message || 'Erreur lors de l’envoi du lien de récupération.');
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     }
   };
 
   return (
+<<<<<<< HEAD
     <div className={isAdminPortal
       ? 'flex min-h-screen flex-col items-center justify-center bg-slate-100 px-4 py-10'
       : 'mx-auto my-8 max-w-xl px-1 pb-16 sm:my-12'
@@ -239,10 +281,29 @@ export const AuthPage: React.FC = () => {
             {tab === 'register' && (isAdminPortal
               ? 'Créez votre compte admin et accédez immédiatement à la console.'
               : 'Partagez vos solutions techniques avec les devs africains.')}
+=======
+    <div className="max-w-md mx-auto my-6 pb-16">
+      <div className="bg-white border border-palabre-border rounded-card p-6 shadow-sm">
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-palabre-primaryLight text-palabre-primary rounded-xl flex items-center justify-center mx-auto mb-3">
+            {tab === 'login' && <LogIn size={24} />}
+            {tab === 'register' && <UserPlus size={24} />}
+            {tab === 'forgot' && <KeyRound size={24} />}
+          </div>
+          <h1 className="text-2xl font-bold text-palabre-text">
+            {tab === 'login' && 'Connexion à Palabre'}
+            {tab === 'register' && 'Rejoindre la communauté'}
+            {tab === 'forgot' && 'Réinitialiser votre mot de passe'}
+          </h1>
+          <p className="text-xs text-palabre-muted mt-1">
+            {tab === 'login' && 'Accédez à votre espace, vos brouillons et confirmations.'}
+            {tab === 'register' && 'Partagez vos solutions techniques avec les devs africains.'}
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
             {tab === 'forgot' && 'Saisissez votre e-mail pour recevoir le lien de réinitialisation.'}
           </p>
         </div>
 
+<<<<<<< HEAD
         {!isSupabaseConfigured && (
           <div role="alert" className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
             <AlertCircle size={19} className="mt-0.5 shrink-0 text-amber-700" aria-hidden="true" />
@@ -256,6 +317,10 @@ export const AuthPage: React.FC = () => {
 
         {/* Onglets */}
         <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1.5 text-sm font-semibold">
+=======
+        {/* Onglets */}
+        <div className="grid grid-cols-2 gap-1 bg-palabre-bg p-1 rounded-btn mb-5 text-xs font-semibold">
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
           <button
             type="button"
             onClick={() => {
@@ -263,9 +328,15 @@ export const AuthPage: React.FC = () => {
               setAuthError('');
               setAuthSuccess('');
             }}
+<<<<<<< HEAD
             className={`min-h-10 rounded-lg transition-colors cursor-pointer ${
               tab === 'login'
                 ? 'bg-white text-palabre-text shadow-sm'
+=======
+            className={`py-2 rounded transition-colors cursor-pointer ${
+              tab === 'login'
+                ? 'bg-white text-palabre-text shadow-xs'
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 : 'text-palabre-muted hover:text-palabre-text'
             }`}
           >
@@ -278,9 +349,15 @@ export const AuthPage: React.FC = () => {
               setAuthError('');
               setAuthSuccess('');
             }}
+<<<<<<< HEAD
             className={`min-h-10 rounded-lg transition-colors cursor-pointer ${
               tab === 'register'
                 ? 'bg-white text-palabre-text shadow-sm'
+=======
+            className={`py-2 rounded transition-colors cursor-pointer ${
+              tab === 'register'
+                ? 'bg-white text-palabre-text shadow-xs'
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 : 'text-palabre-muted hover:text-palabre-text'
             }`}
           >
@@ -289,14 +366,22 @@ export const AuthPage: React.FC = () => {
         </div>
 
         {authError && (
+<<<<<<< HEAD
           <div role="alert" className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center gap-2">
+=======
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-btn flex items-center gap-2">
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
             <AlertCircle size={15} className="shrink-0" />
             <span>{authError}</span>
           </div>
         )}
 
         {authSuccess && (
+<<<<<<< HEAD
           <div role="status" className="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center gap-2">
+=======
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-btn flex items-center gap-2">
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
             <CheckCircle2 size={15} className="shrink-0" />
             <span>{authSuccess}</span>
           </div>
@@ -341,6 +426,7 @@ export const AuthPage: React.FC = () => {
                   Mot de passe oublié ?
                 </button>
               </div>
+<<<<<<< HEAD
               <div className="relative">
                 <input
                   type={showLoginPassword ? 'text' : 'password'}
@@ -360,6 +446,16 @@ export const AuthPage: React.FC = () => {
                   {showLoginPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
+=======
+              <input
+                type="password"
+                placeholder="••••••••"
+                {...loginForm.register('password')}
+                className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
+                  loginForm.formState.errors.password ? 'border-red-500' : 'border-palabre-border'
+                }`}
+              />
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
               {loginForm.formState.errors.password && (
                 <p className="text-xs text-red-500 mt-1">
                   {loginForm.formState.errors.password.message}
@@ -386,7 +482,11 @@ export const AuthPage: React.FC = () => {
               </label>
               <input
                 type="text"
+<<<<<<< HEAD
                 placeholder="Mouhamed Tine"
+=======
+                placeholder="Awa Ndiaye"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 {...registerForm.register('displayName')}
                 className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
                   registerForm.formState.errors.displayName ? 'border-red-500' : 'border-palabre-border'
@@ -405,7 +505,11 @@ export const AuthPage: React.FC = () => {
               </label>
               <input
                 type="text"
+<<<<<<< HEAD
                 placeholder="tine_dev"
+=======
+                placeholder="awa_dev"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 {...registerForm.register('username')}
                 className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
                   registerForm.formState.errors.username ? 'border-red-500' : 'border-palabre-border'
@@ -424,7 +528,11 @@ export const AuthPage: React.FC = () => {
               </label>
               <input
                 type="email"
+<<<<<<< HEAD
                 placeholder="tine@exemple.com"
+=======
+                placeholder="awa@exemple.com"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 {...registerForm.register('email')}
                 className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
                   registerForm.formState.errors.email ? 'border-red-500' : 'border-palabre-border'
@@ -459,6 +567,7 @@ export const AuthPage: React.FC = () => {
                 <label className="block text-xs font-semibold text-palabre-text mb-1">
                   Mot de passe *
                 </label>
+<<<<<<< HEAD
                 <div className="relative">
                   <input
                     type={showRegisterPassword ? 'text' : 'password'}
@@ -478,6 +587,16 @@ export const AuthPage: React.FC = () => {
                     {showRegisterPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
+=======
+                <input
+                  type="password"
+                  placeholder="8 caractères min."
+                  {...registerForm.register('password')}
+                  className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
+                    registerForm.formState.errors.password ? 'border-red-500' : 'border-palabre-border'
+                  }`}
+                />
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 {registerForm.formState.errors.password && (
                   <p className="text-xs text-red-500 mt-1">
                     {registerForm.formState.errors.password.message}
@@ -489,6 +608,7 @@ export const AuthPage: React.FC = () => {
                 <label className="block text-xs font-semibold text-palabre-text mb-1">
                   Confirmation *
                 </label>
+<<<<<<< HEAD
                 <div className="relative">
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -508,6 +628,16 @@ export const AuthPage: React.FC = () => {
                     {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
+=======
+                <input
+                  type="password"
+                  placeholder="Répétez"
+                  {...registerForm.register('confirmPassword')}
+                  className={`w-full px-3 py-2 bg-palabre-bg border rounded-btn text-sm ${
+                    registerForm.formState.errors.confirmPassword ? 'border-red-500' : 'border-palabre-border'
+                  }`}
+                />
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 {registerForm.formState.errors.confirmPassword && (
                   <p className="text-xs text-red-500 mt-1">
                     {registerForm.formState.errors.confirmPassword.message}
@@ -539,11 +669,15 @@ export const AuthPage: React.FC = () => {
               disabled={registerForm.formState.isSubmitting}
               className="w-full py-2.5 bg-palabre-primary hover:bg-palabre-primaryHover text-white rounded-btn text-sm font-semibold transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
+<<<<<<< HEAD
               {registerForm.formState.isSubmitting
                 ? 'Création en cours...'
                 : isAdminPortal
                   ? 'Créer mon compte administrateur'
                   : 'Créer mon compte'}
+=======
+              {registerForm.formState.isSubmitting ? 'Création en cours...' : 'Créer mon compte'}
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
             </button>
           </form>
         )}

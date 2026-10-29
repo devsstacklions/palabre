@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { UserRoleType, Profile } from '../types';
 
@@ -17,6 +18,11 @@ const requireAuthConfiguration = () => {
   }
 };
 
+=======
+import { supabase } from '../lib/supabase';
+import { UserRoleType, Profile } from '../types';
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 export const authService = {
   async register(data: {
     email: string;
@@ -24,19 +30,29 @@ export const authService = {
     username: string;
     displayName: string;
     country?: string;
+<<<<<<< HEAD
     adminPortal?: boolean;
   }, confirmationPath = '/login?confirmed=1') {
     requireAuthConfiguration();
+=======
+  }) {
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
+<<<<<<< HEAD
         emailRedirectTo: `${getAppOrigin()}${confirmationPath}`,
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
         data: {
           username: data.username,
           display_name: data.displayName,
           country: data.country || '',
+<<<<<<< HEAD
           palabre_portal: data.adminPortal ? 'admin' : 'user',
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
         },
       },
     });
@@ -45,6 +61,7 @@ export const authService = {
     return authData;
   },
 
+<<<<<<< HEAD
   async confirmEmail(tokenHash: string, type: 'email' | 'signup') {
     requireAuthConfiguration();
     const { data, error } = await supabase.auth.verifyOtp({
@@ -57,6 +74,9 @@ export const authService = {
 
   async login(email: string, password: string) {
     requireAuthConfiguration();
+=======
+  async login(email: string, password: string) {
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -66,15 +86,24 @@ export const authService = {
   },
 
   async logout() {
+<<<<<<< HEAD
     // End this browser session without revoking the administrator's other sessions.
     const { error } = await supabase.auth.signOut({ scope: 'local' });
+=======
+    const { error } = await supabase.auth.signOut();
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     if (error) throw error;
   },
 
   async requestPasswordReset(email: string) {
+<<<<<<< HEAD
     requireAuthConfiguration();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${getAppOrigin()}/reset-password`,
+=======
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     });
     if (error) throw error;
   },
@@ -93,6 +122,7 @@ export const authService = {
   },
 
   async getUserRole(userId: string): Promise<UserRoleType> {
+<<<<<<< HEAD
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -106,12 +136,30 @@ export const authService = {
     if (roles.includes('moderator')) return 'moderator';
     if (roles.includes('contributor')) return 'contributor';
     return 'user';
+=======
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error || !data) return 'user';
+      return data.role as UserRoleType;
+    } catch {
+      return 'user';
+    }
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
   },
 
   async getUserProfile(userId: string): Promise<Profile | null> {
     const { data, error } = await supabase
       .from('profiles')
+<<<<<<< HEAD
       .select('id, username, display_name, avatar_url, country, bio, tech_stack, is_public, created_at, updated_at')
+=======
+      .select('*')
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
       .eq('id', userId)
       .maybeSingle();
 
@@ -122,3 +170,7 @@ export const authService = {
     return data;
   },
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

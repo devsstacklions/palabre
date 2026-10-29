@@ -14,8 +14,13 @@ interface AuthContextType {
   isAdmin: boolean;
   isModerator: boolean;
   isLoading: boolean;
+<<<<<<< HEAD
   login: (data: LoginFormData) => Promise<UserRoleType>;
   register: (data: RegisterFormData, confirmationPath?: string, adminPortal?: boolean) => Promise<{ hasSession: boolean; role: UserRoleType }>;
+=======
+  login: (data: LoginFormData) => Promise<void>;
+  register: (data: RegisterFormData) => Promise<void>;
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
   logout: () => Promise<void>;
   updateProfile: (data: ProfileUpdateFormData) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -30,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [role, setRole] = useState<UserRoleType>('user');
   const [isLoading, setIsLoading] = useState(true);
 
+<<<<<<< HEAD
   const fetchUserData = async (
     currentUser: User | null,
     strictRoleCheck = false
@@ -42,6 +48,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setProfile(null);
     setRole('user');
+=======
+  const fetchUserData = async (currentUser: User | null) => {
+    if (!currentUser) {
+      setProfile(null);
+      setRole('user');
+      return;
+    }
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     try {
       const [userProfile, userRole] = await Promise.all([
         authService.getUserProfile(currentUser.id),
@@ -68,17 +83,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setRole(userRole);
+<<<<<<< HEAD
       return userRole;
     } catch (err) {
       console.warn('Erreur lors du chargement des données utilisateur:', err);
       setRole('user');
       if (strictRoleCheck) throw err;
       return 'user';
+=======
+    } catch (err) {
+      console.warn('Erreur lors du chargement des données utilisateur:', err);
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     }
   };
 
   useEffect(() => {
     let mounted = true;
+<<<<<<< HEAD
     let loadVersion = 0;
 
     const initializeSession = async () => {
@@ -152,11 +173,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (mounted && currentVersion === loadVersion) setIsLoading(false);
           });
       }, 0);
+=======
+
+    async function initAuth() {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+          if (data.session?.user) {
+            await fetchUserData(data.session.user);
+          }
+        }
+      } catch (err) {
+        console.warn('Initialisation session auth:', err);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    }
+
+    initAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      if (!mounted) return;
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      if (newSession?.user) {
+        await fetchUserData(newSession.user);
+      } else {
+        setProfile(null);
+        setRole('user');
+      }
+      setIsLoading(false);
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     });
 
     return () => {
       mounted = false;
+<<<<<<< HEAD
       loadVersion += 1;
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
       subscription.unsubscribe();
     };
   }, []);
@@ -168,6 +227,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(res.user);
       setSession(res.session);
       if (res.user) {
+<<<<<<< HEAD
         try {
           return await fetchUserData(res.user, true);
         } catch (error) {
@@ -184,12 +244,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
       return 'user';
+=======
+        await fetchUserData(res.user);
+      }
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     } finally {
       setIsLoading(false);
     }
   };
 
+<<<<<<< HEAD
   const register = async (data: RegisterFormData, confirmationPath?: string, adminPortal = false) => {
+=======
+  const register = async (data: RegisterFormData) => {
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     setIsLoading(true);
     try {
       const res = await authService.register({
@@ -198,6 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         username: data.username,
         displayName: data.displayName,
         country: data.country,
+<<<<<<< HEAD
         adminPortal,
       }, confirmationPath);
       setUser(res.session ? res.user : null);
@@ -210,6 +279,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setRole('user');
       }
       return { hasSession: Boolean(res.session), role: registeredRole };
+=======
+      });
+      setUser(res.user);
+      setSession(res.session);
+      if (res.user) {
+        await fetchUserData(res.user);
+      }
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     } finally {
       setIsLoading(false);
     }
@@ -268,3 +345,7 @@ export const useAuth = () => {
   }
   return context;
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

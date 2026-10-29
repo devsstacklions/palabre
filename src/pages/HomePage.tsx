@@ -69,6 +69,7 @@ export const HomePage: React.FC = () => {
   return (
     <div className="space-y-12 pb-12">
       {/* Hero section */}
+<<<<<<< HEAD
       <section className="relative isolate overflow-hidden rounded-[2rem] bg-[#123F35] px-6 py-9 text-white shadow-xl shadow-emerald-950/10 sm:px-10 sm:py-12 lg:px-14">
         <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-28 -z-10 h-80 w-80 rounded-full border-[44px] border-white/[0.045]" />
         <div aria-hidden="true" className="pointer-events-none absolute right-20 top-12 -z-10 h-3 w-3 rounded-full bg-[#EAA35D] shadow-[0_0_32px_12px_rgba(234,163,93,0.2)]" />
@@ -91,17 +92,43 @@ export const HomePage: React.FC = () => {
           <Link
             to="/search"
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#EAA35D] px-5 py-2.5 text-sm font-bold text-[#2C281F] shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#F2B978]"
+=======
+      <section className="pt-8 pb-4 max-w-3xl">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-palabre-primaryLight text-palabre-primary text-xs font-semibold mb-4 border border-emerald-200">
+          <Sparkles size={13} />
+          <span>CADev 2026 · Par les devs, pour les devs</span>
+        </div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-palabre-text tracking-tight leading-tight mb-3">
+          La bonne solution, <br className="hidden sm:inline" />
+          <span className="text-palabre-primary">testée chez vous.</span>
+        </h1>
+        <p className="text-base sm:text-lg text-palabre-muted leading-relaxed mb-6">
+          Palabre rassemble des fiches techniques contextualisées pour l'Afrique : Mobile Money (Wave, Orange, MTN), SMS, USSD, contraintes réseau et passerelles locales, datées et confirmées par la communauté.
+        </p>
+
+        <SearchBar />
+
+        <div className="flex flex-wrap items-center gap-3 mt-4">
+          <Link
+            to="/search"
+            className="px-5 py-2.5 bg-palabre-primary hover:bg-palabre-primaryHover text-white rounded-btn font-semibold text-sm transition-colors shadow-sm inline-flex items-center gap-2"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
           >
             <span>Explorer les solutions</span>
             <ArrowRight size={15} />
           </Link>
           <Link
             to="/fiches/new"
+<<<<<<< HEAD
             className="inline-flex min-h-11 items-center rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+=======
+            className="px-5 py-2.5 bg-white border border-palabre-border hover:bg-slate-50 text-palabre-text rounded-btn font-semibold text-sm transition-colors shadow-xs"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
           >
             Partager une solution
           </Link>
         </div>
+<<<<<<< HEAD
         {!user && (
           <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/15 pt-5 text-sm">
             <span className="text-emerald-50/70">Déjà membre ?</span>
@@ -111,6 +138,8 @@ export const HomePage: React.FC = () => {
           </div>
         )}
         </div>
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
       </section>
 
       {/* Comment ça marche */}
@@ -213,3 +242,7 @@ export const HomePage: React.FC = () => {
     </div>
   );
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

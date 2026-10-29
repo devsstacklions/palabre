@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
@@ -15,6 +16,21 @@
 
 * {
   box-sizing: border-box;
+=======
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #F6F7F4;
+  --sf: #FFFFFF;
+  --tx: #14201C;
+  --mu: #5B6B65;
+  --bd: #DDE3DF;
+  --pr: #0F5C4A;
+  --pt: #FFFFFF;
+  --ac: #E8892B;
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 }
 
 body {
@@ -22,6 +38,7 @@ body {
   color: var(--tx);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   min-height: 100vh;
+<<<<<<< HEAD
   margin: 0;
 }
 
@@ -53,14 +70,22 @@ body {
   }
 }
 
+=======
+}
+
+/* Custom focus styles for accessibility */
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 :focus-visible {
   outline: 2px solid var(--ac);
   outline-offset: 2px;
 }
 
+<<<<<<< HEAD
 button,
 input,
 select,
 textarea {
   font: inherit;
 }
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

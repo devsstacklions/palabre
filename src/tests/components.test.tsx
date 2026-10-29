@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+<<<<<<< HEAD
+=======
+import React from 'react';
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 import { MemoryRouter } from 'react-router-dom';
 import { Badge } from '../components/ui/Badge';
 import { CodeBlock } from '../components/fiches/CodeBlock';
@@ -89,3 +93,7 @@ describe('UI Components', () => {
     });
   });
 });
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

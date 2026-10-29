@@ -6,7 +6,11 @@ export const profileService = {
   async getProfile(userId: string): Promise<Profile | null> {
     const { data, error } = await supabase
       .from('profiles')
+<<<<<<< HEAD
       .select('id, username, display_name, avatar_url, country, bio, tech_stack, is_public, created_at, updated_at')
+=======
+      .select('*')
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
       .eq('id', userId)
       .maybeSingle();
 
@@ -20,7 +24,11 @@ export const profileService = {
   async getProfileByUsername(username: string): Promise<Profile | null> {
     const { data, error } = await supabase
       .from('profiles')
+<<<<<<< HEAD
       .select('id, username, display_name, avatar_url, country, bio, tech_stack, is_public, created_at, updated_at')
+=======
+      .select('*')
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
       .eq('username', username)
       .maybeSingle();
 
@@ -42,7 +50,11 @@ export const profileService = {
         is_public: data.isPublic,
       })
       .eq('id', userId)
+<<<<<<< HEAD
       .select('id, username, display_name, avatar_url, country, bio, tech_stack, is_public, created_at, updated_at')
+=======
+      .select()
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
       .single();
 
     if (error) {
@@ -52,3 +64,7 @@ export const profileService = {
     return updated as Profile;
   },
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

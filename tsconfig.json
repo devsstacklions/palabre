@@ -21,6 +21,10 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Path Aliases */
+<<<<<<< HEAD
+=======
+    "ignoreDeprecations": "6.0",
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
@@ -28,3 +32,7 @@
   },
   "include": ["src"]
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

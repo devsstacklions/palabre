@@ -13,15 +13,23 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@supabase/supabase-js": "^2.48.1",
+<<<<<<< HEAD
     "@tailwindcss/postcss": "^4.3.3",
     "clsx": "^2.1.1",
     "desktop": "^0.1.0",
     "docker": "^1.0.0",
+=======
+    "clsx": "^2.1.1",
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     "lucide-react": "^0.475.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
+<<<<<<< HEAD
     "react-router-dom": "^7.18.4",
+=======
+    "react-router-dom": "^6.29.0",
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     "tailwind-merge": "^2.6.0",
     "zod": "^3.24.2"
   },
@@ -35,9 +43,16 @@
     "autoprefixer": "^10.4.20",
     "jsdom": "^26.0.0",
     "postcss": "^8.5.2",
+<<<<<<< HEAD
     "tailwindcss": "^4.3.3",
     "typescript": "~5.7.2",
     "vite": "^6.1.0",
     "vitest": "^4.1.12"
+=======
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.7.2",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
   }
 }

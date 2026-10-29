@@ -1,5 +1,9 @@
 import React from 'react';
+<<<<<<< HEAD
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+=======
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 import { AuthProvider } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -10,6 +14,7 @@ import { SearchPage } from './pages/SearchPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 import { FicheDetailPage } from './pages/FicheDetailPage';
 import { NewFichePage } from './pages/NewFichePage';
+<<<<<<< HEAD
 import { ProfilePage } from './pages/ProfilePage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { AdminModerationPage } from './pages/AdminModerationPage';
@@ -19,11 +24,20 @@ import { AdminLayout } from './components/layout/AdminLayout';
 import { HelpPage } from './pages/HelpPage';
 import { AuthPage } from './pages/AuthPage';
 import { useAuth } from './contexts/AuthContext';
+=======
+import { DashboardPage } from './pages/DashboardPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { AdminModerationPage } from './pages/AdminModerationPage';
+import { HelpPage } from './pages/HelpPage';
+import { AuthPage } from './pages/AuthPage';
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 
 export const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
+<<<<<<< HEAD
         <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
@@ -52,12 +66,19 @@ const AppRoutes: React.FC = () => {
       {!isAdminArea && <Header />}
       <main className={`flex-1 w-full ${isAdminArea ? '' : 'max-w-7xl mx-auto px-4 py-6 sm:px-6'}`}>
         <Routes>
+=======
+        <div className="flex flex-col min-h-screen bg-palabre-bg text-palabre-text">
+          <Header />
+          <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
+            <Routes>
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
               {/* Routes Publiques */}
               <Route path="/" element={<HomePage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/fiches/:id" element={<FicheDetailPage />} />
               <Route path="/help" element={<HelpPage />} />
+<<<<<<< HEAD
               <Route
                 path="/login"
                 element={
@@ -67,6 +88,9 @@ const AppRoutes: React.FC = () => {
                 }
               />
               <Route path="/admin/login" element={<AuthPage />} />
+=======
+              <Route path="/login" element={<AuthPage />} />
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 
               {/* Routes Protégées Utilisateur */}
               <Route
@@ -79,7 +103,15 @@ const AppRoutes: React.FC = () => {
               />
               <Route
                 path="/dashboard"
+<<<<<<< HEAD
                 element={<Navigate to={isAdmin ? '/admin' : '/search'} replace />}
+=======
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
               />
               <Route
                 path="/profile"
@@ -98,11 +130,16 @@ const AppRoutes: React.FC = () => {
                 }
               />
 
+<<<<<<< HEAD
               {/* Routes distinctes d'administration et de modération */}
+=======
+              {/* Route Protégée Modération / Admin */}
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
               <Route
                 path="/admin"
                 element={
                   <ProtectedRoute requireAdmin={true}>
+<<<<<<< HEAD
                     <AdminLayout>
                       <AdminDashboardPage />
                     </AdminLayout>
@@ -133,6 +170,8 @@ const AppRoutes: React.FC = () => {
                 path="/moderation"
                 element={
                   <ProtectedRoute requireModerator>
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                     <AdminModerationPage />
                   </ProtectedRoute>
                 }
@@ -140,11 +179,24 @@ const AppRoutes: React.FC = () => {
 
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
+<<<<<<< HEAD
         </Routes>
       </main>
       {!isAdminArea && <Footer />}
     </div>
+=======
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
   );
 };
 
 export default App;
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

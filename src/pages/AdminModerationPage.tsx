@@ -1,23 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { reportService } from '../services/report.service';
+<<<<<<< HEAD
 import { adminService, ModerationFicheStats } from '../services/admin.service';
 import { ficheService } from '../services/fiche.service';
 import { useAuth } from '../contexts/AuthContext';
 import { FicheReport } from '../types';
+=======
+import { ficheService } from '../services/fiche.service';
+import { useAuth } from '../contexts/AuthContext';
+import { FicheReport, Fiche } from '../types';
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 import { formatRelativeDate } from '../lib/utils';
 import { ShieldCheck, AlertTriangle, EyeOff, Check, ExternalLink } from 'lucide-react';
 
 export const AdminModerationPage: React.FC = () => {
   const { user } = useAuth();
   const [reports, setReports] = useState<FicheReport[]>([]);
+<<<<<<< HEAD
   const [ficheStats, setFicheStats] = useState<ModerationFicheStats>({ needsReview: 0, hidden: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+=======
+  const [fiches, setFiches] = useState<Fiche[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
   const [actionSuccess, setActionSuccess] = useState('');
 
   const loadModerationData = async () => {
     setIsLoading(true);
+<<<<<<< HEAD
     setLoadError('');
     try {
       const [reps, stats] = await Promise.all([
@@ -29,6 +41,17 @@ export const AdminModerationPage: React.FC = () => {
     } catch (err) {
       console.error('Erreur chargement données modération:', err);
       setLoadError('Impossible de charger les données de modération. Réessayez.');
+=======
+    try {
+      const [reps, allFiches] = await Promise.all([
+        reportService.getReports(),
+        ficheService.getFiches(),
+      ]);
+      setReports(reps);
+      setFiches(allFiches);
+    } catch (err) {
+      console.error('Erreur chargement données modération:', err);
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +92,11 @@ export const AdminModerationPage: React.FC = () => {
   };
 
   const openReports = reports.filter((r) => r.status === 'open');
+<<<<<<< HEAD
+=======
+  const toVerifyCount = fiches.filter((f) => f.verification_status === 're').length;
+  const hiddenCount = fiches.filter((f) => f.status === 'hidden').length;
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 
   return (
     <div className="space-y-6 pb-16 max-w-5xl">
@@ -91,6 +119,7 @@ export const AdminModerationPage: React.FC = () => {
         </div>
       )}
 
+<<<<<<< HEAD
       {loadError && (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-btn border border-red-200 bg-red-50 p-3 text-xs text-red-800">
           <span>{loadError}</span>
@@ -100,6 +129,8 @@ export const AdminModerationPage: React.FC = () => {
         </div>
       )}
 
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
       {/* Cartes d'indicateurs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white border border-palabre-border rounded-card p-4 shadow-xs">
@@ -121,7 +152,11 @@ export const AdminModerationPage: React.FC = () => {
               Priorité
             </span>
           </div>
+<<<<<<< HEAD
           <p className="text-3xl font-black text-palabre-text mt-2">{ficheStats.needsReview}</p>
+=======
+          <p className="text-3xl font-black text-palabre-text mt-2">{toVerifyCount}</p>
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
         </div>
 
         <div className="bg-white border border-palabre-border rounded-card p-4 shadow-xs">
@@ -131,7 +166,11 @@ export const AdminModerationPage: React.FC = () => {
             </span>
             <EyeOff size={18} className="text-slate-500" />
           </div>
+<<<<<<< HEAD
           <p className="text-3xl font-black text-palabre-text mt-2">{ficheStats.hidden}</p>
+=======
+          <p className="text-3xl font-black text-palabre-text mt-2">{hiddenCount}</p>
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
         </div>
       </div>
 

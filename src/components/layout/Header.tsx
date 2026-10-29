@@ -2,10 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { notificationService } from '../../services/notification.service';
+<<<<<<< HEAD
 import { Menu, X, Bell, UserRound, UserPlus, ShieldCheck } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { user, profile, isModerator, isAdmin, logout } = useAuth();
+=======
+import { Menu, X, Bell } from 'lucide-react';
+
+export const Header: React.FC = () => {
+  const { user, profile, isAdmin, isModerator, logout } = useAuth();
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -44,8 +51,13 @@ export const Header: React.FC = () => {
   const userInitial = (profile?.display_name?.[0] || user?.email?.[0] || 'D').toUpperCase();
 
   return (
+<<<<<<< HEAD
     <header className="sticky top-0 z-40 border-b border-palabre-border/80 bg-white/95 shadow-sm backdrop-blur">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+=======
+    <header className="sticky top-0 z-40 bg-white border-b border-palabre-border">
+      <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 font-bold text-lg text-palabre-text">
           <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true" className="shrink-0">
@@ -63,7 +75,11 @@ export const Header: React.FC = () => {
         </Link>
 
         {/* Desktop Navigation */}
+<<<<<<< HEAD
         <nav className="hidden lg:flex items-center gap-1 flex-1 overflow-x-auto py-1">
+=======
+        <nav className="hidden md:flex items-center gap-1 flex-1 overflow-x-auto py-1">
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
           <NavLink to="/search" className={navLinkClass}>
             Explorer
           </NavLink>
@@ -76,6 +92,12 @@ export const Header: React.FC = () => {
 
           {user && (
             <>
+<<<<<<< HEAD
+=======
+              <NavLink to="/dashboard" className={navLinkClass}>
+                Tableau de bord
+              </NavLink>
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
               <NavLink to="/notifications" className={navLinkClass}>
                 <span className="flex items-center gap-1.5">
                   <Bell size={15} />
@@ -97,6 +119,7 @@ export const Header: React.FC = () => {
             Aide
           </NavLink>
 
+<<<<<<< HEAD
           {isModerator && (
             <NavLink to="/moderation" className={navLinkClass}>
               Modération
@@ -107,6 +130,22 @@ export const Header: React.FC = () => {
               <span className="flex items-center gap-1.5"><ShieldCheck size={15} /> Console admin</span>
             </NavLink>
           )}
+=======
+          {(isAdmin || isModerator) && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                  isActive
+                    ? 'bg-amber-100 text-amber-900'
+                    : 'text-amber-800 hover:bg-amber-50'
+                }`
+              }
+            >
+              Modération
+            </NavLink>
+          )}
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
         </nav>
 
         {/* User / Auth actions */}
@@ -134,6 +173,7 @@ export const Header: React.FC = () => {
               </button>
             </div>
           ) : (
+<<<<<<< HEAD
             <>
               <Link
                 to="/login?mode=user"
@@ -150,6 +190,14 @@ export const Header: React.FC = () => {
                 Créer un compte
               </Link>
             </>
+=======
+            <Link
+              to="/login"
+              className="px-4 py-2 bg-palabre-primary hover:bg-palabre-primaryHover text-white rounded-btn text-sm font-semibold transition-colors shadow-sm"
+            >
+              Connexion
+            </Link>
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
           )}
         </div>
 
@@ -159,7 +207,10 @@ export const Header: React.FC = () => {
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="md:hidden p-2 text-palabre-muted hover:text-palabre-text rounded-lg"
           aria-label="Menu"
+<<<<<<< HEAD
           aria-expanded={mobileMenuOpen}
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
         >
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -193,6 +244,16 @@ export const Header: React.FC = () => {
           {user && (
             <>
               <NavLink
+<<<<<<< HEAD
+=======
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium text-palabre-text hover:bg-palabre-bg"
+              >
+                Tableau de bord
+              </NavLink>
+              <NavLink
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
                 to="/notifications"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-palabre-text hover:bg-palabre-bg"
@@ -222,16 +283,25 @@ export const Header: React.FC = () => {
             Aide & Directives
           </NavLink>
 
+<<<<<<< HEAD
           {isModerator && (
             <NavLink
               to="/moderation"
               onClick={() => setMobileMenuOpen(false)}
               className="block px-3 py-2 rounded-lg text-sm font-semibold text-palabre-primary bg-palabre-primaryLight"
+=======
+          {(isAdmin || isModerator) && (
+            <NavLink
+              to="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-lg text-sm font-semibold text-amber-800 bg-amber-50"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
             >
               Modération & Signalements
             </NavLink>
           )}
 
+<<<<<<< HEAD
           {isAdmin && (
             <NavLink
               to="/admin"
@@ -239,6 +309,8 @@ export const Header: React.FC = () => {
               className="block rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white"
             >Console admin</NavLink>
           )}
+=======
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
           <div className="pt-3 border-t border-palabre-border">
             {user ? (
               <button
@@ -252,6 +324,7 @@ export const Header: React.FC = () => {
                 Déconnexion
               </button>
             ) : (
+<<<<<<< HEAD
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Link
                   to="/login?mode=user"
@@ -270,6 +343,15 @@ export const Header: React.FC = () => {
                   Créer un compte
                 </Link>
               </div>
+=======
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-center py-2 bg-palabre-primary text-white rounded-btn font-semibold text-sm"
+              >
+                Connexion
+              </Link>
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
             )}
           </div>
         </div>
@@ -277,3 +359,7 @@ export const Header: React.FC = () => {
     </header>
   );
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

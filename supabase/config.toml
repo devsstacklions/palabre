@@ -1,5 +1,9 @@
 # Supabase CLI configuration
+<<<<<<< HEAD
 project_id = "cuyshnsdhxgfhuwlidxx"
+=======
+project_id = "pwisquamqrkqbjwtglzj"
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
 
 [api]
 enabled = true
@@ -20,7 +24,15 @@ port = 54323
 [auth]
 enabled = true
 site_url = "http://localhost:5173"
+<<<<<<< HEAD
 additional_redirect_urls = ["http://localhost:5173/login", "http://127.0.0.1:5173/login", "http://localhost:5173/admin/login", "http://127.0.0.1:5173/admin/login"]
 jwt_expiry = 3600
 enable_signup = true
 email_double_confirm = false
+=======
+additional_redirect_urls = ["https://localhost:5173", "http://127.0.0.1:5173"]
+jwt_expiry = 3600
+enable_signup = true
+email_double_confirm = false
+
+>>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
