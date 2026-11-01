@@ -6,7 +6,7 @@ import { ficheService } from '../services/fiche.service';
 import { favoriteService } from '../services/favorite.service';
 import { useAuth } from '../contexts/AuthContext';
 import { Fiche, SearchFilters, VerificationStatus } from '../types';
-import { PAYS, SERVICES, TECHNOLOGIES, VERIFICATION_STATUS_CONFIG } from '../../src/lib/constants';
+import { PAYS, SERVICES, TECHNOLOGIES, VERIFICATION_STATUS_CONFIG } from '../lib/constants';
 import { X, SlidersHorizontal, RotateCcw } from 'lucide-react';
 
 export const SearchPage: React.FC = () => {

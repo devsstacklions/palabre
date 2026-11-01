@@ -33,6 +33,8 @@ export const TECHNOLOGIES = [
   'Flutter',
 ] as const;
 
+export const CERTIFICATION_THRESHOLD = 3;
+
 export const VERIFICATION_STATUS_CONFIG: Record<
   VerificationStatus,
   {
@@ -43,26 +45,26 @@ export const VERIFICATION_STATUS_CONFIG: Record<
   }
 > = {
   ok: {
-    label: 'Confirmée (contexte défini)',
-    description: 'Validée récemment par plusieurs développeurs dans un contexte précis.',
+    label: 'Certifiée par la communauté',
+    description: `Validée par au moins ${CERTIFICATION_THRESHOLD} développeurs dans un contexte précis sans contestation active.`,
     badgeClass: 'bg-palabre-okBg text-palabre-ok border-emerald-200',
     icon: 'CheckCircle2',
   },
   re: {
     label: 'À revérifier',
-    description: 'Ancienne vérification ou contexte susceptible d’avoir évolué.',
+    description: 'Dernière confirmation ancienne (> 90 jours) ou contexte susceptible d’avoir évolué.',
     badgeClass: 'bg-palabre-reBg text-palabre-re border-amber-200',
     icon: 'Clock',
   },
   fl: {
-    label: 'Signalée',
-    description: 'Un contributeur a observé un comportement différent ou un blocage.',
+    label: 'Contestée',
+    description: 'Un ou plusieurs contributeurs ont signalé un échec ou un blocage nécessitant réexamen.',
     badgeClass: 'bg-palabre-flBg text-palabre-fl border-red-200',
     icon: 'AlertTriangle',
   },
   new: {
-    label: 'Récente, peu vérifiée',
-    description: 'Publiée récemment, nécessite des tests dans votre environnement.',
+    label: 'En attente de validation',
+    description: 'Fiche récemment publiée, en attente de confirmations communautaires dans différents contextes.',
     badgeClass: 'bg-palabre-newBg text-palabre-new border-blue-200',
     icon: 'Sparkles',
   },
@@ -74,5 +76,20 @@ export const REPORT_REASONS = [
   { value: 'obsolete', label: 'Solution obsolète / Ne fonctionne plus' },
   { value: 'security_risk', label: 'Code dangereux ou faille de sécurité' },
   { value: 'other', label: 'Autre problème' },
+] as const;
+
+export const CODE_LANGUAGES = [
+  'javascript',
+  'typescript',
+  'python',
+  'php',
+  'go',
+  'java',
+  'dart',
+  'bash',
+  'sql',
+  'json',
+  'html',
+  'css',
 ] as const;
 

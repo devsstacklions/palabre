@@ -43,6 +43,13 @@ export interface ModerationFicheStats {
   hidden: number;
 }
 
+export interface AdminAccessRequestItem {
+  id: string;
+  user_id: string;
+  created_at: string;
+  display_name?: string;
+  username?: string;
+}
 export interface AdminUserPage {
   users: Pick<Profile, 'id' | 'display_name' | 'username' | 'country' | 'created_at'>[];
   total: number;
@@ -186,4 +193,49 @@ export const adminService = {
       hidden: hidden.count ?? 0,
     };
   },
+
+  async requestAdminAccess(email: string): Promise<string> {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        await supabase.from('notifications').insert({
+          user_id: user.id,
+          title: 'Demande d’accès administrateur',
+          message: `Une demande d’accès administrateur a été transmise pour ${email || user.email}.`,
+          type: 'system',
+        });
+      }
+    } catch {
+      // Non-bloquant en cas d'absence de session ou d'exécution hors ligne
+    }
+    return 'pending';
+  },
+  async getPendingAdminAccessRequests(): Promise<AdminAccessRequestItem[]> {
+    const { data, error } = await supabase
+      .from('admin_access_requests')
+      .select('id, user_id, created_at, profiles(display_name, username)')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data ?? []).map((row: any) => ({
+      id: row.id,
+      user_id: row.user_id,
+      created_at: row.created_at,
+      display_name: row.profiles?.display_name || 'Utilisateur',
+      username: row.profiles?.username || '',
+    }));
+  },
+
+  async reviewAdminAccessRequest(requestId: string, decision: 'approved' | 'rejected'): Promise<void> {
+    const { error } = await supabase.rpc('review_admin_access_request', {
+      request_id: requestId,
+      decision,
+    });
+    if (error) throw error;
+  },
 };
+
