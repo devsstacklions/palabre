@@ -1,27 +1,9 @@
-<<<<<<< HEAD
-@import "tailwindcss";
-@config "../tailwind.config.js";
-
-:root {
-  color-scheme: light;
-  --bg: #F5F7F4;
-  --sf: #FFFFFF;
-  --tx: #14201C;
-  --mu: #53665F;
-  --bd: #D9E3DD;
-  --pr: #0D604C;
-  --pt: #FFFFFF;
-  --ac: #0F5C4A;
-}
-
-* {
-  box-sizing: border-box;
-=======
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  color-scheme: light;
   --bg: #F6F7F4;
   --sf: #FFFFFF;
   --tx: #14201C;
@@ -30,35 +12,47 @@
   --pr: #0F5C4A;
   --pt: #FFFFFF;
   --ac: #E8892B;
->>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   background-color: var(--bg);
+  background-image: radial-gradient(
+    ellipse at 50% -20%,
+    rgba(15, 92, 74, 0.055),
+    transparent 54%
+  );
   color: var(--tx);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   min-height: 100vh;
-<<<<<<< HEAD
   margin: 0;
 }
 
+/* Accessibilité : focus clavier */
 :focus-visible {
-  scroll-behavior: smooth;
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
+/* Sélection du texte */
 ::selection {
   color: #FFFFFF;
   background: #0F5C4A;
 }
 
-body {
-  background-image: radial-gradient(ellipse at 50% -20%, rgba(15, 92, 74, 0.055), transparent 54%);
+/* Cohérence typographique des champs */
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
-:focus-visible {
-  border-radius: 4px;
-}
-
+/* Respect des préférences de réduction des animations */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -69,23 +63,3 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
-
-=======
-}
-
-/* Custom focus styles for accessibility */
->>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
-:focus-visible {
-  outline: 2px solid var(--ac);
-  outline-offset: 2px;
-}
-
-<<<<<<< HEAD
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-=======
->>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

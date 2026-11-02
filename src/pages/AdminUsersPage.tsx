@@ -1,6 +1,6 @@
 import React, { FormEvent, useCallback, useEffect, useState } from 'react';
-import { AlertCircle, ChevronLeft, ChevronRight, Search, Users } from 'lucide-react';
-import { adminService, AdminUserPage } from '../services/admin.service';
+import { AlertCircle, ChevronLeft, ChevronRight, Search, Users, ShieldCheck } from 'lucide-react';
+import { adminService, AdminUserPage, AdminAccessRequestItem } from '../services/admin.service';
 import { formatRelativeDate } from '../lib/utils';
 
 const PAGE_SIZE = 20;
@@ -10,8 +10,18 @@ export const AdminUsersPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<AdminUserPage | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<AdminAccessRequestItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const loadRequests = useCallback(async () => {
+    try {
+      const requests = await adminService.getPendingAdminAccessRequests();
+      setPendingRequests(requests);
+    } catch (cause) {
+      console.error('Erreur chargement demandes admin:', cause);
+    }
+  }, []);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -29,7 +39,17 @@ export const AdminUsersPage: React.FC = () => {
 
   useEffect(() => {
     void loadUsers();
-  }, [loadUsers]);
+    void loadRequests();
+  }, [loadUsers, loadRequests]);
+
+  const handleReviewRequest = async (requestId: string, decision: 'approved' | 'rejected') => {
+    try {
+      await adminService.reviewAdminAccessRequest(requestId, decision);
+      await loadRequests();
+    } catch (cause) {
+      console.error('Erreur traitement demande admin:', cause);
+    }
+  };
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,6 +68,37 @@ export const AdminUsersPage: React.FC = () => {
           Répertoire des profils, consultable par nom d’utilisateur. Les adresses e-mail ne sont pas exposées dans cet espace.
         </p>
       </div>
+
+      {pendingRequests.length > 0 && (
+        <section className="overflow-hidden rounded-xl border border-amber-200 bg-amber-50/50 p-5 shadow-xs">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck size={18} className="text-amber-700" />
+            <h3 className="font-semibold text-amber-900">Demandes d’accès administrateur en attente</h3>
+          </div>
+          <div className="space-y-3">
+            {pendingRequests.map((req) => (
+              <div
+                key={req.id}
+                className="flex items-center justify-between rounded-lg border border-amber-200 bg-white p-3.5 shadow-xs"
+              >
+                <div>
+                  <p className="font-medium text-slate-900">{req.display_name}</p>
+                  <p className="text-xs text-slate-500">@{req.username}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void handleReviewRequest(req.id, 'approved')}
+                    className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                  >
+                    Approuver
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <form onSubmit={handleSearch} className="flex max-w-xl gap-2">
         <label htmlFor="admin-user-search" className="sr-only">Rechercher par nom d’utilisateur</label>

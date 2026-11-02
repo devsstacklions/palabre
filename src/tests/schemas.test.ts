@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { ficheFormSchema } from '../schemas/fiche.schema';
 import { loginSchema, registerSchema } from '../schemas/auth.schema';
 import { confirmationSchema, reportSchema, variantSchema } from '../schemas/interaction.schema';
+import { questionFormSchema, answerFormSchema, questionReportSchema } from '../schemas/entraide.schema';
 
 describe('Validation Schemas (Zod)', () => {
   describe('ficheFormSchema', () => {
@@ -127,6 +128,67 @@ describe('Validation Schemas (Zod)', () => {
         code_snippet: 'const phone = "229" + rawPhone;',
       };
       expect(variantSchema.safeParse(valid).success).toBe(true);
+    });
+  });
+
+  describe('entraide schemas', () => {
+    it('valide un problème d’entraide complet', () => {
+      const valid = {
+        title: 'Erreur 401 Webhook Wave Checkout',
+        description: 'La vérification de signature HMAC échoue systématiquement sur mon serveur Express.',
+        technology: 'Node.js',
+        language: 'TypeScript',
+        framework: 'Express',
+        error_message: 'Invalid signature header',
+        expected_result: 'Le statut de la commande passe à payé',
+        tools_version: 'Node 20.10',
+        environment: 'Ubuntu 22.04',
+        code_snippet: 'const isValid = verifyWaveSignature(body, signature, secret);',
+        code_language: 'typescript',
+        attachments: [],
+        status: 'open' as const,
+      };
+      const result = questionFormSchema.safeParse(valid);
+      expect(result.success).toBe(true);
+    });
+
+    it('rejette une question avec un titre inférieur à 5 caractères', () => {
+      const invalid = {
+        title: 'Bug',
+        description: 'Description suffisamment longue pour passer le test.',
+        technology: 'React',
+      };
+      const result = questionFormSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+    });
+
+    it('rejette une question sans technologie', () => {
+      const invalid = {
+        title: 'Erreur de connexion',
+        description: 'Description valide et explicite de mon problème.',
+        technology: '',
+      };
+      const result = questionFormSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+    });
+
+    it('valide une réponse d’entraide', () => {
+      const validAnswer = {
+        content: 'Vous devez utiliser express.raw() pour capturer le corps brut sans parsing JSON.',
+        code_snippet: 'app.use("/webhook", express.raw({ type: "application/json" }));',
+        code_language: 'javascript',
+      };
+      const result = answerFormSchema.safeParse(validAnswer);
+      expect(result.success).toBe(true);
+    });
+
+    it('valide un signalement de problème d’entraide', () => {
+      const validReport = {
+        reason: 'security_risk' as const,
+        description: 'L’extrait de code contient une clé API secrète en clair.',
+      };
+      const result = questionReportSchema.safeParse(validReport);
+      expect(result.success).toBe(true);
     });
   });
 });

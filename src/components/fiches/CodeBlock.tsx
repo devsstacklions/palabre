@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { copyToClipboard } from '../../lib/utils';
@@ -7,12 +8,17 @@ interface CodeBlockProps {
   language?: string;
 }
 
-export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'Code' }) => {
+export const CodeBlock: React.FC<CodeBlockProps> = ({
+  code,
+  language = 'Code',
+}) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     if (!code) return;
+
     const success = await copyToClipboard(code);
+
     if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
@@ -26,11 +32,10 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'Code' })
   return (
     <div className="relative rounded-xl overflow-hidden my-3 border border-palabre-border shadow-sm group">
       <div className="flex items-center justify-between px-4 py-2 bg-[#080E0C] border-b border-[#1C2C26] text-xs text-[#9DB0A8]">
-<<<<<<< HEAD
-        <span className="font-mono uppercase tracking-wider">{language.toUpperCase()}</span>
-=======
-        <span className="font-mono uppercase tracking-wider">{language}</span>
->>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529
+        <span className="font-mono uppercase tracking-wider">
+          {language.toUpperCase()}
+        </span>
+
         <button
           type="button"
           onClick={handleCopy}
@@ -50,13 +55,10 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'Code' })
           )}
         </button>
       </div>
+
       <pre className="p-4 bg-palabre-codeBg text-palabre-codeText overflow-x-auto text-sm font-mono leading-relaxed selection:bg-[#0F5C4A] selection:text-white">
         <code>{code}</code>
       </pre>
     </div>
   );
 };
-<<<<<<< HEAD
-=======
-
->>>>>>> de6efc04b307a70c95fb5c79f8b8dcff05ba7529

@@ -31,6 +31,8 @@ export const NotificationsPage: React.FC = () => {
     }
     if (notif.fiche_id) {
       navigate(`/fiches/${notif.fiche_id}`);
+    } else if (notif.question_id) {
+      navigate(`/entraide/${notif.question_id}`);
     }
   };
 
