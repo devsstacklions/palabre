@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, AlertCircle, ArrowRight, BookOpenCheck, RefreshCw, ShieldAlert, Users } from 'lucide-react';
+import { Activity, AlertCircle, ArrowRight, BookOpenCheck, Flag, HelpCircle, MessageSquare, RefreshCw, ShieldAlert, Users } from 'lucide-react';
 import { adminService, AdminOverview } from '../services/admin.service';
 import { formatRelativeDate } from '../lib/utils';
 import { ActivityChart } from '../components/admin/ActivityChart';
@@ -18,6 +18,24 @@ const metricCards = [
     label: 'Signalements ouverts',
     icon: ShieldAlert,
     color: 'text-amber-700 bg-amber-50',
+  },
+  {
+    key: 'questionCount',
+    label: "Questions d'entraide",
+    icon: MessageSquare,
+    color: 'text-blue-700 bg-blue-50',
+  },
+  {
+    key: 'unansweredQuestionCount',
+    label: 'Questions sans réponse',
+    icon: HelpCircle,
+    color: 'text-amber-700 bg-amber-50',
+  },
+  {
+    key: 'openQuestionReportCount',
+    label: 'Signalements entraide',
+    icon: Flag,
+    color: 'text-rose-700 bg-rose-50',
   },
   {
     key: 'activeContributorCount',

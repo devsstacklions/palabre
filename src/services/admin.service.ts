@@ -14,6 +14,9 @@ export interface AdminOverview {
   userCount: number;
   publishedFicheCount: number;
   openReportCount: number;
+  questionCount: number;
+  unansweredQuestionCount: number;
+  openQuestionReportCount: number;
   activeContributorCount: number;
   dailyActivity: DailyActivity[];
   recentProfiles: Pick<Profile, 'id' | 'display_name' | 'username' | 'created_at'>[];
@@ -84,59 +87,87 @@ export const adminService = {
     endDate.setUTCDate(endDate.getUTCDate() + 1);
     const end = endDate.toISOString();
 
-    const [profiles, publishedFiches, openReports, recentProfiles, recentReports,
-      signups, ficheEvents, confirmationEvents, variantEvents, reportEvents] =
-      await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase
-          .from('fiches')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'published'),
-        supabase
-          .from('fiche_reports')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'open'),
-        supabase
-          .from('profiles')
-          .select('id, display_name, username, created_at')
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('fiche_reports')
-          .select(`
-            id,
-            fiche_id,
-            user_id,
-            reason,
-            description,
-            status,
-            created_at,
-            fiche:fiches (id, title, status, author_id)
-          `)
-          .eq('status', 'open')
-          .order('created_at', { ascending: false })
-          .limit(5),
-        readRecentActivity(async (from, to) => await supabase.from('profiles')
-          .select('created_at, actor_id:id').gte('created_at', start).lt('created_at', end)
-          .order('created_at').range(from, to)),
-        readRecentActivity(async (from, to) => await supabase.from('fiches')
-          .select('created_at, actor_id:author_id').eq('status', 'published')
-          .gte('created_at', start).lt('created_at', end).order('created_at').range(from, to)),
-        readRecentActivity(async (from, to) => await supabase.from('fiche_confirmations')
-          .select('created_at, actor_id:user_id').gte('created_at', start).lt('created_at', end)
-          .order('created_at').range(from, to)),
-        readRecentActivity(async (from, to) => await supabase.from('fiche_variants')
-          .select('created_at, actor_id:author_id').gte('created_at', start).lt('created_at', end)
-          .order('created_at').range(from, to)),
-        readRecentActivity(async (from, to) => await supabase.from('fiche_reports')
-          .select('created_at, actor_id:user_id').gte('created_at', start).lt('created_at', end)
-          .order('created_at').range(from, to)),
-      ]);
+    const [
+      profiles,
+      publishedFiches,
+      openReports,
+      questions,
+      unansweredQuestions,
+      openQuestionReports,
+      recentProfiles,
+      recentReports,
+      signups,
+      ficheEvents,
+      confirmationEvents,
+      variantEvents,
+      reportEvents,
+    ] = await Promise.all([
+      supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      supabase
+        .from('fiches')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'published'),
+      supabase
+        .from('fiche_reports')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'open'),
+      supabase
+        .from('questions')
+        .select('id', { count: 'exact', head: true })
+        .neq('status', 'draft'),
+      supabase
+        .from('questions')
+        .select('id', { count: 'exact', head: true })
+        .eq('answers_count', 0)
+        .not('status', 'in', '("draft","hidden")'),
+      supabase
+        .from('question_reports')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'open'),
+      supabase
+        .from('profiles')
+        .select('id, display_name, username, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase
+        .from('fiche_reports')
+        .select(`
+          id,
+          fiche_id,
+          user_id,
+          reason,
+          description,
+          status,
+          created_at,
+          fiche:fiches (id, title, status, author_id)
+        `)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(5),
+      readRecentActivity(async (from, to) => await supabase.from('profiles')
+        .select('created_at, actor_id:id').gte('created_at', start).lt('created_at', end)
+        .order('created_at').range(from, to)),
+      readRecentActivity(async (from, to) => await supabase.from('fiches')
+        .select('created_at, actor_id:author_id').eq('status', 'published')
+        .gte('created_at', start).lt('created_at', end).order('created_at').range(from, to)),
+      readRecentActivity(async (from, to) => await supabase.from('fiche_confirmations')
+        .select('created_at, actor_id:user_id').gte('created_at', start).lt('created_at', end)
+        .order('created_at').range(from, to)),
+      readRecentActivity(async (from, to) => await supabase.from('fiche_variants')
+        .select('created_at, actor_id:author_id').gte('created_at', start).lt('created_at', end)
+        .order('created_at').range(from, to)),
+      readRecentActivity(async (from, to) => await supabase.from('fiche_reports')
+        .select('created_at, actor_id:user_id').gte('created_at', start).lt('created_at', end)
+        .order('created_at').range(from, to)),
+    ]);
 
     const queryError =
       profiles.error ??
       publishedFiches.error ??
       openReports.error ??
+      questions.error ??
+      unansweredQuestions.error ??
+      openQuestionReports.error ??
       recentProfiles.error ??
       recentReports.error;
     if (queryError) throw queryError;
@@ -145,6 +176,9 @@ export const adminService = {
       userCount: profiles.count ?? 0,
       publishedFicheCount: publishedFiches.count ?? 0,
       openReportCount: openReports.count ?? 0,
+      questionCount: questions.count ?? 0,
+      unansweredQuestionCount: unansweredQuestions.count ?? 0,
+      openQuestionReportCount: openQuestionReports.count ?? 0,
       activeContributorCount: new Set([
         ...ficheEvents.map(({ actor_id }) => actor_id),
         ...confirmationEvents.map(({ actor_id }) => actor_id),
@@ -238,4 +272,3 @@ export const adminService = {
     if (error) throw error;
   },
 };
-
